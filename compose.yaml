@@ -1,10 +1,18 @@
 services:
   mysql:
-    image: 'mysql:latest'
+    image: "mysql:8.0"
+    container_name: optica_db
+    restart: always
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      - MYSQL_DATABASE=optica
+      - MYSQL_USER=admin_optica
+      - MYSQL_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=root123456
+      - TZ=America/Lima
     ports:
-      - '3306'
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
