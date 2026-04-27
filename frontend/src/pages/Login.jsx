@@ -31,7 +31,7 @@ const Login = () => {
 
     // Estilos modernos en objetos
     const styles = {
-        container: {
+        container: {    
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
