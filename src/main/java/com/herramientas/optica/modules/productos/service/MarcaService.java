@@ -1,0 +1,77 @@
+package com.herramientas.optica.modules.productos.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.herramientas.optica.modules.productos.model.Marca;
+import com.herramientas.optica.modules.productos.repository.MarcaRepository;
+import com.herramientas.optica.modules.productos.repository.ProductoRepository;
+
+@Service
+public class MarcaService {
+
+    private final MarcaRepository marcaRepository;
+    private final ProductoRepository productoRepository;
+
+    private static final int ESTADO_ACTIVO = 1;
+    private static final int ESTADO_INACTIVO = 2;
+    private static final int ESTADO_BORRADO = 0;
+
+    public MarcaService(MarcaRepository marcaRepository, ProductoRepository productoRepository) {
+        this.marcaRepository = marcaRepository;
+        this.productoRepository = productoRepository;
+    }
+
+    public List<Marca> listarGestion() {
+        return marcaRepository.findByEstadoNot(ESTADO_BORRADO);
+    }
+
+    @Transactional
+    public Marca crear(Marca request) {
+        String nombre = request.getNombre().trim().toUpperCase();
+        if (marcaRepository.existsByNombre(nombre)) {
+            throw new IllegalArgumentException("La marca '" + nombre + "' ya existe.");
+        }
+        request.setNombre(nombre);
+        request.setEstado(1);
+        return marcaRepository.save(request);
+    }
+
+    @Transactional
+    public Marca cambiarEstado(Long id) {
+        Marca marca = marcaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
+
+        if (marca.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede cambiar el estado de una marca eliminada.");
+        }
+
+        if (marca.getEstado() == ESTADO_ACTIVO) {
+            long conteo = productoRepository.countByMarcaIdAndEstadoNot(id, ESTADO_BORRADO);
+            if (conteo > 0) {
+                throw new IllegalStateException("No se puede deshabilitar la marca '" + marca.getNombre() +
+                        "' porque tiene " + conteo + " productos asociados.");
+            }
+        }
+
+        marca.setEstado(marca.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
+        return marcaRepository.save(marca);
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        Marca marca = marcaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
+
+        long conteo = productoRepository.countByMarcaIdAndEstadoNot(id, ESTADO_BORRADO);
+        if (conteo > 0) {
+            throw new IllegalStateException("No se puede eliminar la marca '" + marca.getNombre() +
+                    "' porque está siendo usada por " + conteo + " productos.");
+        }
+
+        marca.setEstado(ESTADO_BORRADO);
+        marcaRepository.save(marca);
+    }
+}
