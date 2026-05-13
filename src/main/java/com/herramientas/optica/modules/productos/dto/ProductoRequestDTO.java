@@ -14,7 +14,6 @@ public class ProductoRequestDTO {
     @NotBlank(message = "El nombre del producto es obligatorio")
     private String nombre;
 
-    @NotBlank(message = "El código del producto es obligatorio")
     private String codigo;
 
     private String modelo;
@@ -44,4 +43,6 @@ public class ProductoRequestDTO {
     private Integer idUnidadCompra;
 
     private Integer factorConversion;
+
+    private java.util.List<String> rutasImagenes;
 }

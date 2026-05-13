@@ -37,6 +37,11 @@ public class MarcaController {
         return ResponseEntity.ok(marcaService.listarGestion());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<MarcaResponseDTO>> listarActivos() {
+        return ResponseEntity.ok(marcaService.listarActivos());
+    }
+
     @PostMapping
     public ResponseEntity<MarcaResponseDTO> crear(@Valid @RequestBody MarcaRequestDTO dto) {
         return new ResponseEntity<>(marcaService.crear(dto), HttpStatus.CREATED);

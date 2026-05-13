@@ -12,10 +12,12 @@ import com.herramientas.optica.modules.productos.model.Categoria;
 import com.herramientas.optica.modules.productos.model.Marca;
 import com.herramientas.optica.modules.productos.model.Producto;
 import com.herramientas.optica.modules.productos.model.Unidad;
+import com.herramientas.optica.modules.productos.model.ProductoImagen;
 import com.herramientas.optica.modules.productos.repository.CategoriaRepository;
 import com.herramientas.optica.modules.productos.repository.MarcaRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 import com.herramientas.optica.modules.productos.repository.UnidadRepository;
+import com.herramientas.optica.modules.productos.repository.ProductoImagenRepository;
 
 @Service
 public class ProductoService {
@@ -24,17 +26,20 @@ public class ProductoService {
     private final CategoriaRepository categoriaRepository;
     private final MarcaRepository marcaRepository;
     private final UnidadRepository unidadRepository;
+    private final ProductoImagenRepository productoImagenRepository;
 
     private static final int ESTADO_ACTIVO = 1;
     private static final int ESTADO_INACTIVO = 2;
     private static final int ESTADO_BORRADO = 0;
 
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
-            MarcaRepository marcaRepository, UnidadRepository unidadRepository) {
+            MarcaRepository marcaRepository, UnidadRepository unidadRepository,
+            ProductoImagenRepository productoImagenRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
         this.unidadRepository = unidadRepository;
+        this.productoImagenRepository = productoImagenRepository;
     }
 
     public List<ProductoResponseDTO> listarTodos() {
@@ -50,8 +55,11 @@ public class ProductoService {
 
     @Transactional
     public ProductoResponseDTO crear(ProductoRequestDTO dto) {
-        if (productoRepository.existsByCodigo(dto.getCodigo())) {
-            throw new IllegalArgumentException("El código de producto '" + dto.getCodigo() + "' ya existe.");
+        String codigoFinal = dto.getCodigo();
+        if (codigoFinal == null || codigoFinal.trim().isEmpty()) {
+            codigoFinal = generarCodigoAutomatico(dto.getTipoProducto());
+        } else if (productoRepository.existsByCodigo(codigoFinal)) {
+            throw new IllegalArgumentException("El código de producto '" + codigoFinal + "' ya existe.");
         }
 
         Categoria categoria = categoriaRepository.findById(dto.getIdCategoria())
@@ -65,7 +73,7 @@ public class ProductoService {
 
         Producto producto = Producto.builder()
                 .nombre(dto.getNombre().toUpperCase())
-                .codigo(dto.getCodigo())
+                .codigo(codigoFinal)
                 .modelo(dto.getModelo())
                 .descripcion(dto.getDescripcion())
                 .precio(dto.getPrecio())
@@ -82,7 +90,38 @@ public class ProductoService {
                 .estado(ESTADO_ACTIVO)
                 .build();
 
-        return mapearAResponse(productoRepository.save(producto));
+        Producto guardado = productoRepository.save(producto);
+
+        // Guardar imágenes
+        if (dto.getRutasImagenes() != null && !dto.getRutasImagenes().isEmpty()) {
+            for (int i = 0; i < dto.getRutasImagenes().size(); i++) {
+                ProductoImagen img = ProductoImagen.builder()
+                        .producto(guardado)
+                        .rutaImagen(dto.getRutasImagenes().get(i))
+                        .esPrincipal(i == 0)
+                        .build();
+                productoImagenRepository.save(img);
+            }
+        }
+
+        return mapearAResponse(guardado);
+    }
+
+    private String generarCodigoAutomatico(com.herramientas.optica.modules.productos.model.TipoProducto tipo) {
+        String prefijo = switch (tipo) {
+            case ARMAZON -> "ARM";
+            case CRISTAL -> "CRI";
+            case LENTE_CONTACTO -> "LEN";
+            case ACCESORIO -> "ACC";
+            case CUIDADO_VISUAL -> "CUI";
+            default -> "PRO";
+        };
+
+        long conteo = productoRepository.findAll().stream()
+                .filter(p -> p.getCodigo() != null && p.getCodigo().startsWith(prefijo))
+                .count();
+
+        return String.format("%s-%05d", prefijo, conteo + 1);
     }
 
     @Transactional
@@ -90,7 +129,8 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
 
-        if (!producto.getCodigo().equals(dto.getCodigo()) && productoRepository.existsByCodigo(dto.getCodigo())) {
+        if (dto.getCodigo() != null && !dto.getCodigo().equals(producto.getCodigo())
+                && productoRepository.existsByCodigo(dto.getCodigo())) {
             throw new IllegalArgumentException("El código de producto '" + dto.getCodigo() + "' ya existe.");
         }
 
@@ -104,7 +144,8 @@ public class ProductoService {
                 .orElseThrow(() -> new IllegalArgumentException("Unidad de compra no encontrada."));
 
         producto.setNombre(dto.getNombre().toUpperCase());
-        producto.setCodigo(dto.getCodigo());
+        if (dto.getCodigo() != null)
+            producto.setCodigo(dto.getCodigo());
         producto.setModelo(dto.getModelo());
         producto.setDescripcion(dto.getDescripcion());
         producto.setPrecio(dto.getPrecio());
@@ -118,6 +159,19 @@ public class ProductoService {
         producto.setUnidadVenta(unidadVenta);
         producto.setUnidadCompra(unidadCompra);
         producto.setFactorConversion(dto.getFactorConversion());
+
+        // Actualizar imágenes (reemplazo simple por ahora)
+        if (dto.getRutasImagenes() != null) {
+            productoImagenRepository.deleteByProductoId(id);
+            for (int i = 0; i < dto.getRutasImagenes().size(); i++) {
+                ProductoImagen img = ProductoImagen.builder()
+                        .producto(producto)
+                        .rutaImagen(dto.getRutasImagenes().get(i))
+                        .esPrincipal(i == 0)
+                        .build();
+                productoImagenRepository.save(img);
+            }
+        }
 
         return mapearAResponse(productoRepository.save(producto));
     }
@@ -144,6 +198,10 @@ public class ProductoService {
     }
 
     private ProductoResponseDTO mapearAResponse(Producto p) {
+        List<String> imgs = productoImagenRepository.findByProductoId(p.getId()).stream()
+                .map(ProductoImagen::getRutaImagen)
+                .collect(Collectors.toList());
+
         return ProductoResponseDTO.builder()
                 .id(p.getId())
                 .nombre(p.getNombre())
@@ -167,6 +225,7 @@ public class ProductoService {
                 .idUnidadCompra(p.getUnidadCompra().getId())
                 .unidadCompraNombre(p.getUnidadCompra().getNombre())
                 .factorConversion(p.getFactorConversion())
+                .rutasImagenes(imgs)
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .build();

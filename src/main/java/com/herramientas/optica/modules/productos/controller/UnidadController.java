@@ -37,6 +37,11 @@ public class UnidadController {
         return ResponseEntity.ok(unidadService.listarGestion());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<UnidadResponseDTO>> listarActivos() {
+        return ResponseEntity.ok(unidadService.listarActivos());
+    }
+
     @PostMapping
     public ResponseEntity<UnidadResponseDTO> crear(@Valid @RequestBody UnidadRequestDTO dto) {
         return new ResponseEntity<>(unidadService.crear(dto), HttpStatus.CREATED);

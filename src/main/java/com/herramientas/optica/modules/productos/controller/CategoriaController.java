@@ -37,6 +37,11 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaService.listarGestion());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<CategoriaResponseDTO>> listarActivos() {
+        return ResponseEntity.ok(categoriaService.listarActivos());
+    }
+
     @PostMapping
     public ResponseEntity<CategoriaResponseDTO> crear(@Valid @RequestBody CategoriaRequestDTO dto) {
         return new ResponseEntity<>(categoriaService.crear(dto), HttpStatus.CREATED);

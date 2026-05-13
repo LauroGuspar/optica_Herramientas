@@ -33,6 +33,13 @@ public class MarcaService {
                 .collect(Collectors.toList());
     }
 
+    public List<MarcaResponseDTO> listarActivos() {
+        return marcaRepository.findAll().stream()
+                .filter(m -> m.getEstado() == ESTADO_ACTIVO)
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public MarcaResponseDTO crear(MarcaRequestDTO dto) {
         String nombre = dto.getNombre().trim().toUpperCase();
@@ -77,12 +84,15 @@ public class MarcaService {
         if (marca.getEstado() == ESTADO_ACTIVO) {
             long conteo = productoRepository.countByMarcaIdAndEstadoNot(id, ESTADO_BORRADO);
             if (conteo > 0) {
-                throw new IllegalStateException("No se puede deshabilitar la marca '" + marca.getNombre() +
-                        "' porque tiene " + conteo + " productos asociados.");
+                // Si tiene productos, pasamos a estado 2 (En desuso)
+                marca.setEstado(ESTADO_INACTIVO);
+            } else {
+                marca.setEstado(ESTADO_INACTIVO);
             }
+        } else {
+            marca.setEstado(ESTADO_ACTIVO);
         }
 
-        marca.setEstado(marca.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
         return mapearAResponse(marcaRepository.save(marca));
     }
 

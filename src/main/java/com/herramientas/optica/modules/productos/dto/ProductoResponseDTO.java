@@ -39,6 +39,9 @@ public class ProductoResponseDTO {
     private String unidadCompraNombre;
 
     private Integer factorConversion;
+
+    private java.util.List<String> rutasImagenes;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

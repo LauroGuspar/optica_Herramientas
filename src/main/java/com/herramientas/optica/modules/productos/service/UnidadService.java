@@ -33,6 +33,13 @@ public class UnidadService {
                 .collect(Collectors.toList());
     }
 
+    public List<UnidadResponseDTO> listarActivos() {
+        return unidadRepository.findAll().stream()
+                .filter(u -> u.getEstado() == ESTADO_ACTIVO)
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public UnidadResponseDTO crear(UnidadRequestDTO dto) {
         String nombre = dto.getNombre().trim().toUpperCase();
@@ -74,12 +81,15 @@ public class UnidadService {
         if (unidad.getEstado() == ESTADO_ACTIVO) {
             long conteo = productoRepository.countByUnidadVentaIdOrUnidadCompraIdAndEstadoNot(id, id, ESTADO_BORRADO);
             if (conteo > 0) {
-                throw new IllegalStateException("La unidad '" + unidad.getNombre() +
-                        "' está siendo usada como unidad de compra o venta en " + conteo + " productos.");
+                // Si tiene productos, pasamos a estado 2 (En desuso)
+                unidad.setEstado(ESTADO_INACTIVO);
+            } else {
+                unidad.setEstado(ESTADO_INACTIVO);
             }
+        } else {
+            unidad.setEstado(ESTADO_ACTIVO);
         }
 
-        unidad.setEstado(unidad.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
         return mapearAResponse(unidadRepository.save(unidad));
     }
 

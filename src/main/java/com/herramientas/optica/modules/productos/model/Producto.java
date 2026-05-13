@@ -38,7 +38,7 @@ public class Producto {
     @Column(name = "produc_nombre", nullable = false, length = 255)
     private String nombre;
 
-    @Column(name = "produc_codigo", nullable = false, unique = true, length = 255)
+    @Column(name = "produc_codigo", unique = true, length = 255)
     private String codigo;
 
     @Column(name = "produc_modelo", length = 255)
@@ -94,6 +94,10 @@ public class Producto {
     @Builder.Default
     @Column(name = "produc_factor_conversion", nullable = false)
     private Integer factorConversion = 1;
+
+    @Builder.Default
+    @jakarta.persistence.OneToMany(mappedBy = "producto", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<ProductoImagen> imagenes = new java.util.ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

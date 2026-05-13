@@ -33,6 +33,13 @@ public class CategoriaService {
                 .collect(Collectors.toList());
     }
 
+    public List<CategoriaResponseDTO> listarActivos() {
+        return categoriaRepository.findAll().stream()
+                .filter(c -> c.getEstado() == ESTADO_ACTIVO)
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public CategoriaResponseDTO crear(CategoriaRequestDTO dto) {
         String nombreLimpio = dto.getNombre().trim().toUpperCase();
@@ -74,11 +81,14 @@ public class CategoriaService {
         if (categoria.getEstado() == ESTADO_ACTIVO) {
             long conteo = productoRepository.countByCategoriaIdAndEstadoNot(id, ESTADO_BORRADO);
             if (conteo > 0) {
-                throw new IllegalStateException("No se puede desactivar la categoría '" + categoria.getNombre() +
-                        "' porque tiene productos vinculados.");
+                // Si tiene productos, pasamos a estado 2 (En desuso)
+                categoria.setEstado(ESTADO_INACTIVO);
+            } else {
+                categoria.setEstado(ESTADO_INACTIVO);
             }
+        } else {
+            categoria.setEstado(ESTADO_ACTIVO);
         }
-        categoria.setEstado(categoria.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
         return mapearAResponse(categoriaRepository.save(categoria));
     }
 
