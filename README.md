@@ -1,62 +1,61 @@
-# Sistema de Gestión de Óptica
+# Sistema de Gestion de Optica
 
-Este es un proyecto integral para la gestión de una óptica, desarrollado con un backend en **Spring Boot** y un frontend en **React**.
+Este es un proyecto integral para la gestion de una optica, desarrollado con un backend en Spring Boot y un frontend en React.
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologias Utilizadas
 
 ### Backend
-- **Java 22**
-- **Spring Boot 4.0.5** (Nota: Revisar versión, posiblemente 3.x)
-- **Spring Security** con **JWT**
-- **Spring Data JPA** (MySQL / H2)
-- **Lombok**
-- **Validation Starter**
-- **Java Mail Sender**
+
+- Java 22
+- Spring Boot 4.0.5 (Nota: Revisar version, posiblemente 3.x)
+- Spring Security con JWT
+- Spring Data JPA (MySQL / H2)
+- Lombok
+- Validation Starter
+- Java Mail Sender
 
 ### Frontend
-- **React** con **Vite**
-- **Axios** para consumo de APIs
-- **Tailwind CSS** (o estilos personalizados según `global.css`)
+
+- React con Vite
+- Axios para consumo de APIs
+- Tailwind CSS (o estilos personalizados segun global.css)
 
 ### Infraestructura y Otros
-- **Docker Compose**
-- **MySQL** (Base de Datos principal)
-- **H2** (Base de Datos para pruebas/consola)
 
-## 📁 Estructura del Proyecto
+- Docker Compose
+- MySQL (Base de Datos principal)
+- H2 (Base de Datos para pruebas/consola)
 
-El backend está organizado por módulos funcionales:
-- **api**: Integración con servicios externos (RENIEC/SUNAT).
-- **clientes**: Gestión de clientes con validación automática de DNI/RUC.
-- **empleados**: Gestión de personal, perfiles y permisos.
-- **productos**: Inventario (Categorías, Marcas, Unidades).
-- **security**: Autenticación y control de acceso.
+## Estructura del Proyecto
 
-## 🛠️ Configuración y Ejecución
+El backend esta organizado por modulos funcionales:
+
+- **api**: Integracion con servicios externos (RENIEC/SUNAT).
+- **clientes**: Gestion de clientes con validacion automatica de DNI/RUC.
+- **empleados**: Gestion de personal, perfiles y permisos.
+- **productos**: Inventario completo con gestion de Marcas, Categorias y Unidades.
+  - Autogeneracion de codigos inteligentes (ej: ARM-00001).
+  - Soporte para multiples imagenes por producto.
+  - Manejo de integridad referencial mediante estado "En Desuso" (Estado 2).
+- **security**: Autenticacion y control de acceso.
+
+## Configuracion y Ejecucion
 
 1. **Backend**:
-   - Configurar variables de entorno o ajustar `application.yml`.
-   - Ejecutar con `./mvnw spring-boot:run`.
+   - Configurar variables de entorno o ajustar application.yml.
+   - Ejecutar con ./mvnw spring-boot:run.
 2. **Frontend**:
-   - Navegar a `cd frontend`.
-   - Instalar dependencias: `npm install`.
-   - Ejecutar en desarrollo: `npm run dev`.
+   - Navegar a cd frontend.
+   - Instalar dependencias: npm install.
+   - Ejecutar en desarrollo: npm run dev.
 
-## 📝 Observaciones y Mejores Prácticas (Evaluación)
+## Observaciones y Mejores Practicas (Evaluacion)
 
-He realizado una revisión inicial del proyecto siguiendo las mejores prácticas de **Java-SpringBoot**:
+He realizado una revision inicial del proyecto siguiendo las mejores practicas de Java-SpringBoot:
 
-### Puntos Positivos ✅
-- **Inyección por Constructor**: Los controladores y servicios utilizan inyección por constructor de forma correcta.
+### Puntos Positivos
+
+- **Inyeccion por Constructor**: Los controladores y servicios utilizan inyeccion por constructor de forma correcta.
 - **Uso de DTOs**: Se utilizan objetos de transferencia de datos para desacoplar las entidades de la API.
-- **Manejo Global de Excepciones**: Implementado mediante `@RestControllerAdvice`.
-- **Estructura por Características**: Organización modular que facilita el escalado.
-
-### Áreas de Mejora 🛠️
-1. **Seguridad de Secretos**: Actualmente hay claves API, contraseñas de Gmail y secretos JWT hardcodeados en `application.yml`. Se recomienda moverlos a variables de entorno o un archivo `.env` no trackeado.
-2. **Validación en DTOs**: Falta el uso de anotaciones como `@NotBlank`, `@Email`, `@Size` en los DTOs para validar las peticiones antes de llegar al servicio.
-3. **Logging**: No se observa una estrategia de logging (SLF4J). Es vital para el diagnóstico en producción.
-4. **Versión de Spring Boot**: La versión `4.0.5` en el `pom.xml` es inusual (actualmente la estable es 3.x). Se recomienda verificar si es intencional o un error de configuración.
-
----
-*Documentación generada automáticamente y revisada para asegurar la calidad del código.*
+- **Manejo Global de Excepciones**: Implementado mediante @RestControllerAdvice.
+- **Estructura por Caracteristicas**: Organizacion modular que facilita el escalado.
