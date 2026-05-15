@@ -47,6 +47,6 @@ app:
     url: "http://localhost:5173"
 
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:default_name}
-  api-key: ${CLOUDINARY_API_KEY:default_key}
-  api-secret: ${CLOUDINARY_API_SECRET:default_secret}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dcagjocw2}
+  api-key: ${CLOUDINARY_API_KEY:786493436357895}
+  api-secret: ${CLOUDINARY_API_SECRET:J7BIyi7ah0yRhGV0yZ2b6-s1Z0s}
