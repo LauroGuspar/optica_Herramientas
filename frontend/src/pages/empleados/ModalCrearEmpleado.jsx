@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Toast, mostrarAlerta } from "../../utils/alerts";
+import { Toast, confirmarAccion, mostrarAlerta } from "../../utils/alerts";
 import { ExclamationTriangle, Search } from "react-bootstrap-icons";
 import {
   ModalShell,
@@ -72,7 +72,7 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
     if (!idPerfil) nuevosErrores.idPerfil = "Seleccione un perfil de acceso.";
 
     setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0; // Retorna true si no hay errores
+    return Object.keys(nuevosErrores).length === 0;
   };
 
   const handleGuardar = async () => {
@@ -105,17 +105,61 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
       recargarTabla();
       cerrarModal();
     } catch (e) {
-      mostrarAlerta(
-        "Error de Registro",
-        e.response?.data?.message || "Hubo un error al guardar",
-        "error",
-      );
+      const msg = e.response?.data?.message || "";
+
+      // 🔁 REACTIVAR — el backend lanza este mensaje cuando estado == BORRADO (0)
+      if (msg.toLowerCase().includes("reactivarlo")) {
+        const confirmacion = await confirmarAccion(
+          "Empleado eliminado",
+          `Este empleado se encuentra registrado pero con estado Eliminado. ¿Desea reactivarlo?`,
+          "Sí, reactivar",
+          "warning",
+        );
+
+        if (confirmacion.isConfirmed) {
+          try {
+            await axios.patch(
+              `/api/v1/empleados/reactivar/${dni}`,
+              {},
+              { headers },
+            );
+            Toast.fire({ icon: "success", title: "Empleado reactivado correctamente" });
+            recargarTabla();
+            cerrarModal();
+          } catch (err2) {
+            mostrarAlerta(
+              "Error",
+              err2.response?.data?.message || "No se pudo reactivar",
+              "error",
+            );
+          }
+        }
+
+        // 🔁 REACTIVAR — el backend lanza este cuando el empleado ya existe con estado ACTIVO o DESHABILITADO
+        // Mensaje: "El empleado con DNI X ya existe y se encuentra Activo/Deshabilitado."
+      } else if (msg.toLowerCase().includes("ya existe y se encuentra")) {
+        // Extraemos el estado del mensaje del backend directamente
+        const estadoMatch = msg.match(/se encuentra\s+(\w+)\./i);
+        const estadoTexto = estadoMatch ? estadoMatch[1] : "registrado";
+
+        mostrarAlerta(
+          "Empleado ya registrado",
+          `Este empleado se encuentra registrado con estado: ${estadoTexto}. Si desea modificarlo, búsquelo en la lista.`,
+          "info",
+        );
+
+      } else {
+        mostrarAlerta(
+          "Error de Registro",
+          msg || "Hubo un error al guardar",
+          "error",
+        );
+      }
     } finally {
       setGuardando(false);
     }
   };
 
-  // Helper para pintar el borde rojo si hay error
   const inputEstilo = (campo) =>
     `input-control ${errores[campo] ? "border-red-500" : ""}`;
   const msgError = (campo) =>

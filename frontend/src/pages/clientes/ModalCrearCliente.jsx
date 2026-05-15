@@ -27,7 +27,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
-  // 🎯 Helpers UI
   const inputError = (campo) =>
     `input-control ${errores[campo] ? "border-red-500" : ""}`;
 
@@ -38,7 +37,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
       </span>
     );
 
-  // 🔎 CONSULTAR DNI
   const consultarDni = async () => {
     if (!dni || dni.length !== 8) {
       setErrores({ dni: "Debe tener 8 dígitos." });
@@ -69,7 +67,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
     }
   };
 
-  // 🧪 VALIDAR
   const validar = () => {
     const err = {};
 
@@ -110,26 +107,46 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
     } catch (e) {
       const msg = e.response?.data?.message || "";
 
-      if (msg.includes("reactivarlo")) {
+      // 🔁 REACTIVAR — el backend lanza este mensaje cuando estado == BORRADO (0)
+      if (msg.toLowerCase().includes("reactivarlo")) {
         const confirmacion = await confirmarAccion(
           "Cliente eliminado",
-          msg,
-          "Reactivar",
+          `Este cliente se encuentra registrado pero con estado Eliminado. ¿Desea reactivarlo?`,
+          "Sí, reactivar",
           "warning",
         );
 
         if (confirmacion.isConfirmed) {
-          await axios.patch(
-            `/api/v1/clientes/reactivar/${dni}`,
-            {},
-            { headers },
-          );
-          Toast.fire({ icon: "success", title: "Cliente reactivado" });
-          recargarTabla();
-          cerrarModal();
+          try {
+            await axios.patch(
+              `/api/v1/clientes/reactivar/${dni}`,
+              {},
+              { headers },
+            );
+            Toast.fire({ icon: "success", title: "Cliente reactivado correctamente" });
+            recargarTabla();
+            cerrarModal();
+          } catch (err2) {
+            mostrarAlerta(
+              "Error",
+              err2.response?.data?.message || "No se pudo reactivar",
+              "error",
+            );
+          }
         }
+
+        // 🔁 REACTIVAR — el backend lanza este mensaje cuando estado == ACTIVO o DESHABILITADO
+      } else if (msg.toLowerCase().includes("ya se encuentra registrado")) {
+        // Extraemos el estado del mensaje: "...se encuentra Activo." o "...se encuentra Deshabilitado."
+        // No se puede reactivar porque no está eliminado, solo informamos
+        mostrarAlerta(
+          "Cliente ya registrado",
+          msg,
+          "info",
+        );
+
       } else {
-        mostrarAlerta("Error", msg, "error");
+        mostrarAlerta("Error", msg || "No se pudo crear el cliente", "error");
       }
     } finally {
       setGuardando(false);
@@ -155,7 +172,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         </>
       }
     >
-      {/* ERROR GENERAL */}
       {errores.general && (
         <div
           style={{
@@ -173,7 +189,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         </div>
       )}
 
-      {/* IDENTIFICACIÓN */}
       <SeccionLabel text="Identificación" />
 
       <div className="form-grid">
@@ -203,7 +218,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         </div>
       </div>
 
-      {/* DNI OK */}
       {datosDni && (
         <div
           style={{
@@ -221,7 +235,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         </div>
       )}
 
-      {/* DATOS PERSONALES */}
       <div className="form-grid">
         <div>
           <label className="label-control">Nombre</label>
@@ -241,7 +254,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
 
       <Divider />
 
-      {/* CONTACTO */}
       <SeccionLabel text="Contacto" />
 
       <div className="form-grid">
