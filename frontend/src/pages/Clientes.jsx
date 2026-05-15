@@ -3,7 +3,7 @@ import axios from "axios";
 import { EyeFill, PencilSquare, Trash3 } from "react-bootstrap-icons";
 
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
-
+import ToggleEstado from "../components/ui/ToggleEstado";
 import ModalCrearCliente from "./clientes/ModalCrearCliente";
 import ModalEditarCliente from "./clientes/ModalEditarCliente";
 import ModalVerCliente from "./clientes/ModalVerCliente";
@@ -238,15 +238,19 @@ const Clientes = () => {
                   <td style={{ padding: "12px" }}>{c.numeroDocumento}</td>
 
                   <td style={{ padding: "12px" }}>
-                    <span
-                      className={`badge ${
-                        c.estado === 1 ? "badge-active" : "badge-inactive"
-                      }`}
-                      onClick={() => cambiarEstado(c.id)}
-                      style={{ cursor: "pointer" }}
+                    <label
+                      className="toggle-switch"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cambiarEstado(c.id);
+                      }}
                     >
-                      {c.estado === 1 ? "Activo" : "Inactivo"}
-                    </span>
+                      <input type="checkbox" readOnly checked={c.estado === 1} />
+                      <span className="toggle-track" />
+                      <span className="toggle-label">
+                        {c.estado === 1 ? "Activo" : "Inactivo"}
+                      </span>
+                    </label>
                   </td>
 
                   <td style={{ padding: "12px", display: "flex", gap: "6px" }}>
