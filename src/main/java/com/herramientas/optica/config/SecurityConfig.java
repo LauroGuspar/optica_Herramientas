@@ -59,7 +59,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.disable()).csrf(csrf -> csrf.disable())
+        http.cors(cors -> cors.configurationSource(request -> {
+                    var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(java.util.List.of("http://localhost:5173"));
+                    corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
+                    corsConfiguration.setAllowCredentials(true);
+                    return corsConfiguration;
+                })).csrf(csrf -> csrf.disable())
 
                 // Rutas a los que cualquiera tenga accesso Cualquiera puede intentar iniciar
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**").permitAll()

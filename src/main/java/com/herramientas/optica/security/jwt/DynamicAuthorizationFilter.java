@@ -26,9 +26,15 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // a. Permitir peticiones OPTIONS (CORS preflight) sin validación
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String path = request.getRequestURI();
 
-        // a. Rutas públicas de autenticación se permiten siempre
+        // b. Rutas públicas de autenticación se permiten siempre
         if (path.startsWith("/api/v1/auth/")) {
             filterChain.doFilter(request, response);
             return;
@@ -59,17 +65,22 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
         // e. Verifica si alguna de las 'Opcion' del perfil tiene una 'ruta' que coincida
         // Normalizamos la URI quitando el prefijo /api/v1 si existe
         String normalizedPath = path.replace("/api/v1", "");
+        if (normalizedPath.isEmpty()) normalizedPath = "/";
+        
+        final String finalPath = normalizedPath;
         
         boolean hasAccess = empleado.getPerfil().getOpciones().stream()
                 .anyMatch(opcion -> {
                     String ruta = opcion.getRuta();
                     if (ruta == null || ruta.isEmpty()) return false;
                     
-                    // Normalizar ruta de la DB: asegurar que empiece con /
+                    // Normalizar ruta de la DB: asegurar que empiece con / y quitar /api/v1 si lo tiene
                     String cleanRuta = ruta.startsWith("/") ? ruta : "/" + ruta;
+                    String compareRuta = cleanRuta.replace("/api/v1", "");
+                    if (compareRuta.isEmpty()) compareRuta = "/";
                     
                     // Si la ruta es exactamente igual o si es un prefijo (ej: /clientes permite /clientes/1)
-                    return normalizedPath.equals(cleanRuta) || normalizedPath.startsWith(cleanRuta + "/");
+                    return finalPath.equals(compareRuta) || finalPath.startsWith(compareRuta + "/");
                 });
 
         if (hasAccess) {

@@ -258,15 +258,20 @@ const MainLayout = ({ opciones = [], setToken }) => {
               <IconDashboard /> Dashboard
             </Link>
             
-            {opciones.map((op) => (
-              <Link
-                key={op.id}
-                to={op.ruta}
-                className={`nav-link ${isActive(op.ruta) ? "active" : ""}`}
-              >
-                {iconMap[op.icono] || <IconDashboard />} {op.nombre}
-              </Link>
-            ))}
+            {opciones.map((op) => {
+              // Normalizar ruta para el Link de React (quitar /api/v1 si existe)
+              const rutaReact = (op.ruta || "").replace("/api/v1", "") || "/";
+              
+              return (
+                <Link
+                  key={op.id}
+                  to={rutaReact}
+                  className={`nav-link ${isActive(rutaReact) ? "active" : ""}`}
+                >
+                  {iconMap[op.icono] || <IconDashboard />} {op.nombre}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Usuario + logout */}

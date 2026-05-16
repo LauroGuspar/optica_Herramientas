@@ -24,10 +24,16 @@ const ProtectedRoute = ({ children, opciones = [], loading }) => {
         return children;
     }
 
-    // Verificar si el path actual coincide con alguna opción (ignorando la barra inicial si es necesario)
+    // Verificar si el path actual coincide con alguna opción (ignorando /api/v1 de la DB)
     const hasAccess = opciones.some(op => {
-        const rutaLimpia = op.ruta.startsWith('/') ? op.ruta : `/${op.ruta}`;
-        return location.pathname === rutaLimpia || location.pathname.startsWith(`${rutaLimpia}/`);
+        if (!op.ruta) return false;
+        
+        // Normalizar ruta de la DB: asegurar que empiece con / y quitar /api/v1
+        let rutaDB = op.ruta.startsWith('/') ? op.ruta : `/${op.ruta}`;
+        rutaDB = rutaDB.replace('/api/v1', '');
+        if (rutaDB === '') rutaDB = '/';
+
+        return location.pathname === rutaDB || location.pathname.startsWith(`${rutaDB}/`);
     });
 
     if (!hasAccess) {
