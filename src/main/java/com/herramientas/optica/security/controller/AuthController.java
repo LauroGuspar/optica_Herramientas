@@ -3,17 +3,25 @@ package com.herramientas.optica.security.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.herramientas.optica.modules.empleados.dto.OpcionResponseDTO;
+import com.herramientas.optica.modules.empleados.model.Empleado;
+import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
 import com.herramientas.optica.security.dto.AuthRequest;
 import com.herramientas.optica.security.dto.AuthResponse;
 import com.herramientas.optica.security.jwt.JwtService;
 import com.herramientas.optica.security.service.CustomUserDetailsService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,13 +31,16 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final EmpleadoRepository empleadoRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
             CustomUserDetailsService userDetailsService,
-            JwtService jwtService) {
+            JwtService jwtService,
+            EmpleadoRepository empleadoRepository) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.empleadoRepository = empleadoRepository;
     }
 
     @PostMapping("/login")
@@ -56,5 +67,23 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok("Sesión cerrada exitosamente en el servidor.");
+    }
+
+    @GetMapping("/mis-opciones")
+    public ResponseEntity<List<OpcionResponseDTO>> getMisOpciones() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Empleado empleado = empleadoRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+
+        List<OpcionResponseDTO> opciones = empleado.getPerfil().getOpciones().stream()
+                .map(opcion -> OpcionResponseDTO.builder()
+                        .id(opcion.getId())
+                        .nombre(opcion.getNombre())
+                        .ruta(opcion.getRuta())
+                        .icono(opcion.getIcono())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(opciones);
     }
 }
