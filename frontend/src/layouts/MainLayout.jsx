@@ -99,7 +99,14 @@ const IconMenu = () => (
   </svg>
 );
 
-const MainLayout = () => {
+const iconMap = {
+  IconDashboard: <IconDashboard />,
+  IconClientes: <IconClientes />,
+  IconEmpleados: <IconEmpleados />,
+  IconPerfiles: <IconPerfiles />,
+};
+
+const MainLayout = ({ opciones = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const username = localStorage.getItem("username");
@@ -244,35 +251,21 @@ const MainLayout = () => {
           {/* Nav */}
           <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
             <Link
-              to="/dashboard"
-              className={`nav-link ${isActive("/dashboard") ? "active" : ""}`}
+              to="/"
+              className={`nav-link ${isActive("/") ? "active" : ""}`}
             >
               <IconDashboard /> Dashboard
             </Link>
-            <Link
-              to="/dashboard/clientes"
-              className={`nav-link ${isActive("/dashboard/clientes") ? "active" : ""}`}
-            >
-              <IconClientes /> Clientes
-            </Link>
-
-            {rol === "ADMINISTRADOR" && (
-              <>
-                <p className="nav-section-label">Administración</p>
-                <Link
-                  to="/dashboard/empleados"
-                  className={`nav-link ${isActive("/dashboard/empleados") ? "active" : ""}`}
-                >
-                  <IconEmpleados /> Empleados
-                </Link>
-                <Link
-                  to="/dashboard/perfiles"
-                  className={`nav-link ${isActive("/dashboard/perfiles") ? "active" : ""}`}
-                >
-                  <IconPerfiles /> Perfiles
-                </Link>
-              </>
-            )}
+            
+            {opciones.map((op) => (
+              <Link
+                key={op.id}
+                to={op.ruta}
+                className={`nav-link ${isActive(op.ruta) ? "active" : ""}`}
+              >
+                {iconMap[op.icono] || <IconDashboard />} {op.nombre}
+              </Link>
+            ))}
           </nav>
 
           {/* Usuario + logout */}

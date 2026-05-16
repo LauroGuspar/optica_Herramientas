@@ -31,7 +31,7 @@ const Login = () => {
         title: `¡Bienvenido(a), ${data.username}!`,
       });
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       const mensajeError =
         err.message || "Credenciales inválidas. Intente de nuevo.";

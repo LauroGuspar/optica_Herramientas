@@ -1,4 +1,5 @@
 import axios from 'axios';
+import api from './axiosConfig';
 
 // Usamos la ruta simplificada gracias al proxy de vite.config.js
 // Esto evita errores de CORS y facilita el trabajo en equipo
@@ -14,5 +15,14 @@ export const login = async (username, password) => {
     } catch (error) {
         // Si el backend responde con un error (ej: 401 Unauthorized), lo capturamos aquí
         throw error.response ? error.response.data : new Error("Error de conexión");
+    }
+};
+
+export const getMisOpciones = async () => {
+    try {
+        const response = await api.get(`${API_URL}/mis-opciones`);
+        return response.data;
+    } catch (error) {
+        throw error.response ? error.response.data : new Error("Error al obtener opciones");
     }
 };
