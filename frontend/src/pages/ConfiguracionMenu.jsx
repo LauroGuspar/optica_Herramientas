@@ -32,6 +32,8 @@ const ConfiguracionMenu = () => {
   const guardarCambios = async (opcion) => {
     try {
       await api.put(`/api/v1/opciones/${opcion.id}/estructura`, {
+        nombre: opcion.nombre,
+        ruta: opcion.ruta,
         idPadre: opcion.idPadre !== undefined ? (opcion.idPadre === "" ? null : opcion.idPadre) : (opcion.padre ? opcion.padre.id : null),
         orden: opcion.orden,
         icono: opcion.icono
@@ -124,7 +126,7 @@ const ConfiguracionMenu = () => {
                     <select
                       className="input-control"
                       style={{ padding: "4px 8px", fontSize: "13px" }}
-                      value={op.idPadre !== undefined ? op.idPadre : (op.padre ? op.padre.id : "")}
+                      value={op.idPadre ?? ""}
                       onChange={(e) => handleChange(op.id, "idPadre", e.target.value)}
                     >
                       <option value="">(Sin Padre)</option>

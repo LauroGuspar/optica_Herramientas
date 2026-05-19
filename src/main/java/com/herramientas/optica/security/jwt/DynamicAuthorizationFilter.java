@@ -92,6 +92,12 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
                 .anyMatch(opcion -> {
                     String compareRuta = normalizePath(opcion.getRuta());
                     if ("/".equals(compareRuta)) return "/".equals(finalPath);
+                    
+                    // Caso especial: El módulo de configuración de menú usa la API /opciones
+                    if (finalPath.startsWith("/opciones") && compareRuta.equals("/configuracion-menu")) {
+                        return true;
+                    }
+                    
                     return finalPath.equals(compareRuta) || finalPath.startsWith(compareRuta + "/");
                 });
 

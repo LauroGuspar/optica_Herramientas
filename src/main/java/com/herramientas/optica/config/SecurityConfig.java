@@ -22,6 +22,7 @@ import com.herramientas.optica.security.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
