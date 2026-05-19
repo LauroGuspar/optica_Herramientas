@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import { Toast, mostrarAlerta } from "../utils/alerts";
+import { iconMap } from "../components/ui/IconCatalog";
 
 const ConfiguracionMenu = () => {
   const [opciones, setOpciones] = useState([]);
@@ -60,6 +61,18 @@ const ConfiguracionMenu = () => {
         <h2 style={{ color: "var(--text-main)", margin: 0 }}>
           Configuración de Menú Jerárquico
         </h2>
+      </div>
+
+      <div style={{ marginBottom: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+        <h4 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>Iconos Disponibles (Copia el nombre)</h4>
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+          {Object.keys(iconMap).map(key => (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', background: 'white', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+              {iconMap[key]}
+              <span>{key}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div
