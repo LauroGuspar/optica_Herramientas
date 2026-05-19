@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Toast, confirmarAccion } from "../utils/alerts";
-import { iconMap, IconDashboard } from "../components/ui/IconCatalog";
+import { IconDashboard } from "../components/ui/IconCatalog";
+import { iconMap } from "../utils/iconUtils";
 
 // ── Iconos SVG inline (Específicos de Layout) ───────────────────────
 const IconLogout = () => (

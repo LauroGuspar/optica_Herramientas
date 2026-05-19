@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import { Toast, mostrarAlerta } from "../utils/alerts";
-import { iconMap } from "../components/ui/IconCatalog";
+import { iconMap } from "../utils/iconUtils";
 
 const ConfiguracionMenu = () => {
   const [opciones, setOpciones] = useState([]);

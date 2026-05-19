@@ -16,15 +16,6 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(!!localStorage.getItem("token"));
 
-  useEffect(() => {
-    if (token) {
-      cargarOpciones();
-    } else {
-      setOpciones([]);
-      setLoading(false);
-    }
-  }, [token]);
-
   const cargarOpciones = async () => {
     setLoading(true);
     try {
@@ -40,6 +31,15 @@ function App() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      cargarOpciones();
+    } else {
+      setOpciones([]);
+      setLoading(false);
+    }
+  }, [token]);
 
   return (
     <BrowserRouter>
@@ -65,12 +65,8 @@ function App() {
           <Route path="clientes" element={<Clientes />} />
           <Route path="empleados" element={<Empleados />} />
           <Route path="perfiles" element={<Perfiles />} />
-          <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
-
-          <Route path="clientes" element={<Clientes />} />
-          <Route path="empleados" element={<Empleados />} />
-          <Route path="perfiles" element={<Perfiles />} />
           <Route path="productos" element={<Productos />} />
+          <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
