@@ -6,6 +6,10 @@ import HomeDashboard from './pages/HomeDashboard';
 import Empleados from './pages/Empleados';
 import Perfiles from './pages/Perfiles';
 import Clientes from './pages/Clientes';
+import Marcas from './pages/Marcas';
+import Categorias from './pages/Categorias';
+import Unidades from './pages/Unidades';
+
 
 function App() {
   return (
@@ -22,12 +26,13 @@ function App() {
           }
         >
           <Route index element={<HomeDashboard />} />
-
-          {/* ← REEMPLAZAR el div inline por el componente */}
           <Route path="clientes" element={<Clientes />} />
 
           <Route path="empleados" element={<Empleados />} />
           <Route path="perfiles" element={<Perfiles />} />
+          <Route path="marcas" element={<Marcas />} />
+          <Route path="categorias" element={<Categorias />} />
+          <Route path="unidades" element={<Unidades />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
