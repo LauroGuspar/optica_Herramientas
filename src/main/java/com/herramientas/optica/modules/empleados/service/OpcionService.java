@@ -83,6 +83,7 @@ public class OpcionService {
 
         // 4. Opciones de Clientes
         Opcion gestionClientes = buscarOCrear("Gestión Clientes", "/clientes", "IconClientes", 1, clientesCat);
+        Opcion caja = buscarOCrear("Caja", "/cajas", "IconDashboard", 2, clientesCat);
 
         // 5. Asignar al Perfil ADMINISTRADOR (Limpieza y Recarga Total)
         perfilRepository.findByNombre("ADMINISTRADOR").ifPresent(perfil -> {
@@ -90,7 +91,7 @@ public class OpcionService {
                 adminCat, inventarioCat, clientesCat, 
                 configMenu, listarEmpleados, perfiles, 
                 productos, marcas, categorias, unidades, 
-                gestionClientes
+                gestionClientes, caja
             );
             
             perfil.getOpciones().clear();
