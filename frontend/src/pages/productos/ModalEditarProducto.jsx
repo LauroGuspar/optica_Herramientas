@@ -43,7 +43,7 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
         setMarcas(resMarcas.data || []);
         setCategorias(resCategorias.data || []);
         setUnidades(resUnidades.data || []);
-      } catch (err) {
+      } catch {
         Toast.fire({ icon: "error", title: "Error al cargar las listas de soporte" });
       }
     };
@@ -65,6 +65,19 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
       {errores[campo]}
     </span>
   );
+
+  const mostrarErrorServidor = (e) => {
+    const validations = e.response?.data?.validations;
+    if (validations) {
+      const erroresFormulario = { ...validations };
+      if (validations.stockInicial && !erroresFormulario.stock) {
+        erroresFormulario.stock = validations.stockInicial;
+      }
+      setErrores(erroresFormulario);
+      return Object.values(validations)[0];
+    }
+    return e.response?.data?.message || "No se pudo actualizar el producto";
+  };
 
   const validarFormulario = () => {
     const err = {};
@@ -125,7 +138,7 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
       recargarTabla();
       cerrarModal();
     } catch (e) {
-      const msg = e.response?.data?.message || "No se pudo actualizar el producto";
+      const msg = mostrarErrorServidor(e);
       mostrarAlerta("Error", msg, "error");
     } finally {
       setGuardando(false);
