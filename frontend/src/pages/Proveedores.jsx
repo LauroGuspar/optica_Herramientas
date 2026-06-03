@@ -9,8 +9,8 @@ import {
   Search 
 } from "react-bootstrap-icons";
 import { Toast } from "../utils/alerts";
-import ModalCrearProveedor from "./proveedores/ModalCrearProveedor";
-import ModalEditarProveedor from "./proveedores/ModalEditarProveedor";
+import ModalCrearProveedor from "./proveedor/ModalCrearProveedor";
+import ModalEditarProveedor from "./proveedor/ModalEditarProveedor";
 
 const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
@@ -144,7 +144,7 @@ const Proveedores = () => {
                     <div style={{ fontWeight: "600" }}>{prov.numeroDocumento}</div>
                     <div style={{ fontSize: "11px", color: "#64748b" }}>{prov.tipoDocumentoNombre}</div>
                   </td>
-                  <td style={styles.td} style={{ fontWeight: "600" }}>{prov.razonSocial}</td>
+                  <td style={{ ...styles.td, fontWeight: "600" }}>{prov.razonSocial}</td>
                   <td style={styles.td}>{prov.nombreComercial || "---"}</td>
                   <td style={styles.td}>
                     <div>{prov.telefono || "---"}</div>
