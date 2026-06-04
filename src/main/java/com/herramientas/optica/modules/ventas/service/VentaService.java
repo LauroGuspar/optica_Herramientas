@@ -205,7 +205,14 @@ public class VentaService {
             throw new IllegalStateException("El producto " + producto.getNombre() + " no esta activo.");
         }
 
+        BigDecimal stockDisponible = producto.getStock() != null ? BigDecimal.valueOf(producto.getStock()) : BigDecimal.ZERO;
+        if (stockDisponible.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El producto " + producto.getNombre() + " está sin stock.");
+        }
         BigDecimal cantidad = normalizarCantidad(dto.getCantidad());
+        if (cantidad.compareTo(stockDisponible) > 0) {
+            throw new IllegalArgumentException("La cantidad solicitada para el producto " + producto.getNombre() + " supera el stock disponible.");
+        }
         BigDecimal precioUnitario = normalizarMontoPositivo(dto.getPrecioUnitario());
         BigDecimal descuento = normalizarMontoNoNegativo(dto.getDescuento() != null ? dto.getDescuento() : BigDecimal.ZERO);
         BigDecimal subtotal = cantidad.multiply(precioUnitario).setScale(2, RoundingMode.HALF_UP).subtract(descuento);
@@ -258,8 +265,12 @@ public class VentaService {
     }
 
     private Caja obtenerCaja(Long cajaId) {
-        return cajaRepository.findById(cajaId)
+        Caja caja = cajaRepository.findById(cajaId)
                 .orElseThrow(() -> new IllegalArgumentException("No se encontro la caja con ID: " + cajaId));
+        if (caja.getEstado() != com.herramientas.optica.modules.caja.model.EstadoCaja.ABIERTA) {
+            throw new IllegalStateException("La caja seleccionada esta cerrada.");
+        }
+        return caja;
     }
 
     private TipoComprobante obtenerTipoComprobanteOpcional(Integer tipoComprobanteId, boolean bloquearParaCorrelativo) {

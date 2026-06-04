@@ -105,6 +105,10 @@ const Ventas = () => {
       Toast.fire({ icon: "warning", title: "Revise cantidad, precio y descuento" });
       return;
     }
+    if (Number(producto.stock || 0) <= 0) {
+      Toast.fire({ icon: "warning", title: "El producto está sin stock y no se puede vender" });
+      return;
+    }
     if (cantidadNumero > Number(producto.stock || 0)) {
       Toast.fire({ icon: "warning", title: "La cantidad supera el stock disponible" });
       return;
@@ -433,20 +437,35 @@ const Ventas = () => {
                   <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, boxShadow: "0 12px 30px rgba(15,23,42,0.12)", zIndex: 20, maxHeight: 260, overflowY: "auto" }}>
                     {productosFiltrados.length === 0 ? (
                       <div style={{ padding: 12, color: "#94a3b8", fontSize: 13 }}>Sin resultados</div>
-                    ) : productosFiltrados.map((producto) => (
-                      <button
-                        key={producto.id}
-                        type="button"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => seleccionarProducto(producto)}
-                        style={{ width: "100%", border: "none", background: "#fff", padding: "10px 12px", textAlign: "left", cursor: "pointer", borderBottom: "1px solid #f1f5f9" }}
-                      >
-                        <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 13 }}>{producto.nombre}</div>
-                        <div style={{ color: "#64748b", fontSize: 12 }}>
-                          {producto.codigo || "---"} | Stock: {producto.stock ?? 0} | {formatoMoneda(producto.precio)}
-                        </div>
-                      </button>
-                    ))}
+                    ) : productosFiltrados.map((producto) => {
+                      const sinStock = (producto.stock ?? 0) <= 0;
+                      return (
+                        <button
+                          key={producto.id}
+                          type="button"
+                          disabled={sinStock}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => !sinStock && seleccionarProducto(producto)}
+                          style={{
+                            width: "100%",
+                            border: "none",
+                            background: "#fff",
+                            padding: "10px 12px",
+                            textAlign: "left",
+                            cursor: sinStock ? "not-allowed" : "pointer",
+                            borderBottom: "1px solid #f1f5f9",
+                            opacity: sinStock ? 0.5 : 1
+                          }}
+                        >
+                          <div style={{ fontWeight: 700, color: sinStock ? "#94a3b8" : "#0f172a", fontSize: 13 }}>
+                            {producto.nombre} {sinStock && "(Sin stock)"}
+                          </div>
+                          <div style={{ color: "#64748b", fontSize: 12 }}>
+                            {producto.codigo || "---"} | Stock: {producto.stock ?? 0} | {formatoMoneda(producto.precio)}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -78,7 +78,7 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
             .catch(() => setError('No se pudo obtener el empleado actual.'));
 
         listarProductos()
-            .then(data => setProductosDB(Array.isArray(data) ? data : []))
+            .then(data => setProductosDB(Array.isArray(data) ? data.filter(p => p.estado === 1) : []))
             .catch(() => setError('No se pudieron cargar los productos.'));
     }, []);
 
@@ -371,7 +371,7 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                             {form.detalles.map((d, i) => (
                                 <div key={i} style={{
                                     display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
-                                    gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'
+                                    gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'start'
                                 }}>
                                     <div className="product-dropdown-container" data-index={i} style={{ position: 'relative' }}>
                                         <input
@@ -418,11 +418,23 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                                                                     - Costo: S/ {Number(p.costo).toFixed(2)}
                                                                 </span>
                                                             )}
+                                                            <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '2px' }}>
+                                                                Compra: {p.unidadCompraNombre || '---'} &rarr; Inventario: {p.factorConversion || 1} {p.unidadVentaNombre || '---'}
+                                                            </div>
                                                         </div>
                                                     ))
                                                 }
                                             </div>
                                         )}
+                                        {(() => {
+                                            const prodObj = productosDB.find(p => String(p.id) === String(d.idProducto));
+                                            return prodObj ? (
+                                                <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px', lineHeight: '1.2' }}>
+                                                    Unidad compra: <strong>{prodObj.unidadCompraNombre || '---'}</strong> <br/>
+                                                    Se transforma a: <strong>{(Number(d.cantidad || 0) * (prodObj.factorConversion || 1))} {prodObj.unidadVentaNombre || 'unidades'}</strong> en inventario (factor x{prodObj.factorConversion || 1})
+                                                </div>
+                                            ) : null;
+                                        })()}
                                     </div>
                                     <input type="number" name="cantidad" value={d.cantidad}
                                         onChange={e => handleDetalleChange(i, e)}

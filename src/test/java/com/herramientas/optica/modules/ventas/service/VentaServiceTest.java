@@ -164,10 +164,29 @@ class VentaServiceTest {
                 producto.getId(),
                 "2",
                 "20.00")))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Stock insuficiente");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("supera el stock disponible");
 
         assertThat(movimientoCajaRepository.findByCajaIdOrderByFechaAsc(caja.getId())).isEmpty();
+    }
+
+    @Test
+    void emitirVentaConProductoSinStockFalla() {
+        Empleado empleado = crearEmpleado("ventas_sin_stock_ex");
+        Cliente cliente = crearCliente("70000009", "Cliente Sin Stock Ex");
+        Producto producto = crearProducto("VENTA-SIN-STOCK-EX", "20.00");
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "100.00"));
+
+        assertThatThrownBy(() -> ventaService.emitirVenta(ventaRequest(
+                cliente.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "1",
+                "20.00")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("está sin stock");
     }
 
     @Test
