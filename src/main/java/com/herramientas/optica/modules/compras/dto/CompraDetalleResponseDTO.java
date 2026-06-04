@@ -16,4 +16,6 @@ public class CompraDetalleResponseDTO {
     private BigDecimal cantidadInventario;
     private BigDecimal costoUnitario;
     private BigDecimal subtotal;
+    private BigDecimal stockPrevio;
+    private BigDecimal stockActual;
 }

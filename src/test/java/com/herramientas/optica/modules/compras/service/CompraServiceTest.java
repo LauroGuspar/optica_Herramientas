@@ -128,6 +128,105 @@ class CompraServiceTest {
                 .isEmpty();
     }
 
+    @Test
+    void recibirCompraConExitoAfectaInventarioYCaja() {
+        Empleado empleado = crearEmpleado("recibir_compra_exito");
+        Proveedor proveedor = crearProveedor("20600000002", "Proveedor Recibir Compra");
+        Producto producto = crearProducto("RECIBIR-COMPRA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "1000.00"));
+
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "5",
+                "20.00"));
+
+        CompraResponseDTO recibida = compraService.recibirCompra(compra.getId(), empleado.getId());
+
+        assertThat(recibida.getEstado()).isEqualTo(EstadoCompra.RECIBIDA);
+        assertThat(recibida.getCajaId()).isEqualTo(caja.getId());
+        assertThat(recibida.getDetalles()).hasSize(1).first().satisfies(detalle -> {
+            assertThat(detalle.getProductoId()).isEqualTo(producto.getId());
+            assertThat(detalle.getStockPrevio()).isEqualByComparingTo("0.000");
+            assertThat(detalle.getStockActual()).isEqualByComparingTo("50.000");
+        });
+
+        // Verificar que el stock en Producto se sincronizó (5 * 10 = 50)
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(50);
+
+        // Verificar que se registró el movimiento de entrada en inventario
+        var movimientosInv = movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId());
+        assertThat(movimientosInv).filteredOn(mov -> mov.getReferenciaTipo() == ReferenciaInventario.COMPRA)
+                .hasSize(1)
+                .first().satisfies(mov -> {
+                    assertThat(mov.getCantidad()).isEqualByComparingTo("50.000");
+                    assertThat(mov.getReferenciaId()).isEqualTo(compra.getId());
+                    assertThat(mov.getEmpleado().getId()).isEqualTo(empleado.getId());
+                });
+
+        // Verificar que se registró el egreso de caja
+        var movimientosCaja = movimientoCajaRepository.findByCajaIdOrderByFechaAsc(caja.getId());
+        assertThat(movimientosCaja).filteredOn(mov -> mov.getOrigen() == OrigenMovimientoCaja.COMPRA)
+                .hasSize(1)
+                .first().satisfies(mov -> {
+                    assertThat(mov.getTipo()).isEqualTo(TipoMovimientoCaja.EGRESO);
+                    assertThat(mov.getMonto()).isEqualByComparingTo("100.00");
+                    assertThat(mov.getReferenciaId()).isEqualTo(compra.getId());
+                });
+    }
+
+    @Test
+    void recibirCompraFallaSiCajaNoEstaAbierta() {
+        Empleado empleadoSinCaja = crearEmpleado("recibir_compra_sin_caja");
+        Empleado empleadoConCaja = crearEmpleado("recibir_compra_con_caja");
+        Proveedor proveedor = crearProveedor("20600000003", "Proveedor Sin Caja");
+        Producto producto = crearProducto("SIN-CAJA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+
+        // Abrimos caja para el empleado con caja
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleadoConCaja.getId(), "500.00"));
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleadoConCaja.getId(),
+                caja.getId(),
+                producto.getId(),
+                "2",
+                "15.00"));
+
+        // Intentar recibir compra usando al empleado sin caja abierta
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            compraService.recibirCompra(compra.getId(), empleadoSinCaja.getId());
+        });
+    }
+
+    @Test
+    void recibirCompraFallaSiYaFueRecibida() {
+        Empleado empleado = crearEmpleado("recibir_compra_repetida");
+        Proveedor proveedor = crearProveedor("20600000004", "Proveedor Compra Repetida");
+        Producto producto = crearProducto("COMPRA-REPETIDA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "1000.00"));
+
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "1",
+                "50.00"));
+
+        // Recibir por primera vez
+        compraService.recibirCompra(compra.getId(), empleado.getId());
+
+        // Intentar recibir por segunda vez
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            compraService.recibirCompra(compra.getId(), empleado.getId());
+        });
+    }
+
     private CompraRequestDTO compraRequest(Long proveedorId, Long empleadoId, Long cajaId, Long productoId,
             String cantidad, String costoUnitario) {
         CompraDetalleRequestDTO detalle = new CompraDetalleRequestDTO();

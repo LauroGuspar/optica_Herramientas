@@ -127,6 +127,45 @@ public class CompraService {
     }
 
     /**
+     * Recibe una compra registrada, aplicando la entrada en inventario e
+     * impactando en la caja abierta del empleado.
+     */
+    @Transactional
+    public CompraResponseDTO recibirCompra(Long compraId, Long empleadoId) {
+        Compra compra = obtenerCompra(compraId);
+        if (compra.getEstado() != EstadoCompra.REGISTRADA.getCodigo()) {
+            throw new IllegalStateException("Solo se pueden recibir compras en estado REGISTRADA.");
+        }
+        Empleado empleado = obtenerEmpleadoActivo(empleadoId);
+
+        // Validar caja abierta
+        Caja caja = cajaRepository.findByEmpleadoIdAndEstado(empleado.getId(), com.herramientas.optica.modules.caja.model.EstadoCaja.ABIERTA)
+                .orElseThrow(() -> new IllegalStateException("El empleado debe tener una caja abierta para recibir la compra."));
+
+        compra.setCaja(caja);
+
+        // Registrar entrada de inventario para cada detalle
+        for (CompraDetalle detalle : compra.getDetalles()) {
+            MovimientoInventarioResponseDTO movimiento = inventarioService.registrarEntradaCompra(
+                    detalle.getProducto().getId(),
+                    detalle.getCantidadCompra(),
+                    "Compra recibida #" + compra.getId(),
+                    ReferenciaInventario.COMPRA,
+                    compra.getId(),
+                    empleado.getId());
+            detalle.setStockPrevio(movimiento.getStockPrevio());
+            detalle.setStockActual(movimiento.getStockNuevo());
+        }
+
+        // Registrar movimiento de egreso en caja
+        cajaService.registrarMovimiento(caja.getId(), movimientoCajaRequest(empleado.getId(), compra.getMedioPago(),
+                compra.getTotal(), compra.getId()));
+
+        compra.setEstado(EstadoCompra.RECIBIDA.getCodigo());
+        return mapearCompra(compraRepository.save(compra));
+    }
+
+    /**
      * Lista compras registradas y anuladas no borradas, ordenadas de la mas reciente
      * a la mas antigua.
      */
@@ -324,6 +363,8 @@ public class CompraService {
                 .cantidadInventario(detalle.getCantidadInventario())
                 .costoUnitario(detalle.getCostoUnitario())
                 .subtotal(detalle.getSubtotal())
+                .stockPrevio(detalle.getStockPrevio())
+                .stockActual(detalle.getStockActual())
                 .build();
     }
 
