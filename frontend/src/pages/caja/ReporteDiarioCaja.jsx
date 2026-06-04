@@ -41,8 +41,7 @@ const ReporteDiarioCaja = () => {
         setSinCaja(true);
         return;
       }
-      const cajaResponse = await api.get(`/api/v1/cajas/actual?empleadoId=${empleadoId}`);
-      const reporteResponse = await api.get(`/api/v1/cajas/${cajaResponse.data.id}/reporte-diario`);
+      const reporteResponse = await api.get(`/api/v1/reportes/caja-diaria/actual?empleadoId=${empleadoId}`);
       setReporte(reporteResponse.data);
     } catch (error) {
       setReporte(null);

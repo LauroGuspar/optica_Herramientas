@@ -18,6 +18,10 @@ import Proveedores from "./pages/Proveedores";
 import Ventas from "./pages/Ventas";
 import ReporteDiarioCaja from "./pages/caja/ReporteDiarioCaja";
 import Compras from "./pages/Compras";
+import ReporteKardex from "./pages/reportes/ReporteKardex";
+import ReporteVentas from "./pages/reportes/ReporteVentas";
+import ReporteCompras from "./pages/reportes/ReporteCompras";
+import ReporteCajas from "./pages/reportes/ReporteCajas";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -84,6 +88,11 @@ function App() {
           <Route path="inventario" element={<Inventario />} />
           <Route path="proveedores" element={<Proveedores />} />
           <Route path="ventas" element={<Ventas />} />
+          <Route path="reportes/caja" element={<ReporteCajas />} />
+          <Route path="reportes/caja-diaria" element={<Navigate to="/reportes/caja" replace />} />
+          <Route path="reportes/kardex" element={<ReporteKardex />} />
+          <Route path="reportes/ventas" element={<ReporteVentas />} />
+          <Route path="reportes/compras" element={<ReporteCompras />} />
           <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
           <Route path="compras" element={<Compras />} />
         </Route>

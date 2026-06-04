@@ -127,7 +127,7 @@ const MainLayout = ({ opciones = [], setToken }) => {
 
   const abrirReporteDiario = () => {
     setModalCajaAbierto(false);
-    navigate("/cajas/reporte-diario");
+    navigate("/reportes/caja");
   };
 
   const css = `
