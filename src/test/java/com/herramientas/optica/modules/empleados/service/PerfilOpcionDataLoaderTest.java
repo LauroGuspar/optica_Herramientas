@@ -49,7 +49,8 @@ class PerfilOpcionDataLoaderTest {
 
         assertThat(adminRecargado.getOpciones()).hasSize(asignacionesPrimeraCarga);
         assertThat(rutas)
-                .contains("/clientes", "/cajas", "/inventario", "/proveedores", "/compras", "/ventas")
-                .doesNotContain("/catalogo-web", "/reportes/ventas");
+                .contains("/clientes", "/cajas", "/inventario", "/proveedores", "/compras", "/ventas",
+                        "/reportes/caja", "/reportes/kardex", "/reportes/ventas", "/reportes/compras")
+                .doesNotContain("/catalogo-web", "/reportes/bajo-stock");
     }
 }

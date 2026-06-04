@@ -28,15 +28,19 @@ class OpcionDataLoaderTest {
         opcionDataLoader.verificarOpciones();
 
         assertThat(opcionRepository.count()).isEqualTo(totalPrimeraCarga);
-        assertThat(opcionRepository.findByNombre("Ventas")).isPresent()
+        assertThat(opcionRepository.findByNombre("Ventas Operativas")).isPresent()
                 .get()
                 .satisfies(opcion -> {
                     assertThat(opcion.getRuta()).isEqualTo("/ventas");
                     assertThat(opcion.getPadre()).isNotNull();
                     assertThat(opcion.getPadre().getNombre()).isEqualTo("Clientes y Ventas");
                 });
+        assertThat(opcionRepository.findByNombre("Ventas")).isPresent()
+                .get()
+                .satisfies(opcion -> assertThat(opcion.getRuta()).isEqualTo("/reportes/ventas"));
         assertThat(opcionRepository.findByNombre("Catálogo Web")).isPresent()
                 .get()
                 .satisfies(opcion -> assertThat(opcion.getRuta()).isEqualTo("/catalogo-web"));
+        assertThat(opcionRepository.findByNombre("Productos Bajo Stock")).isEmpty();
     }
 }
