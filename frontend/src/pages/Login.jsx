@@ -25,6 +25,7 @@ const Login = ({ onLoginSuccess }) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
       localStorage.setItem("rol", data.rol);
+      localStorage.setItem("empleadoId", data.empleadoId);
 
       Toast.fire({
         icon: "success",
