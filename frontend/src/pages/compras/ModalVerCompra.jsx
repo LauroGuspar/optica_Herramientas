@@ -1,5 +1,61 @@
-export default function ModalVerCompra({ compra, onCerrar }) {
+import { useEffect, useState } from 'react';
+import { recibirCompra, anularCompra, getEmpleadoActual } from '../../api/comprasService';
+import { mostrarAlerta, confirmarAccion } from '../../utils/alerts';
+
+export default function ModalVerCompra({ compra, onCerrar, onActionCompleted }) {
+    const [empleadoId, setEmpleadoId] = useState(null);
+
+    useEffect(() => {
+        getEmpleadoActual()
+            .then(setEmpleadoId)
+            .catch(err => console.error('Error al obtener el empleado actual:', err));
+    }, []);
+
     if (!compra) return null;
+
+    const handleRecibir = async (id) => {
+        if (!empleadoId) {
+            mostrarAlerta('Error', 'No se ha podido obtener el empleado actual.', 'error');
+            return;
+        }
+        const confirmacion = await confirmarAccion(
+            '¿Recibir Mercadería?',
+            `¿Está seguro de marcar la compra #${id} como RECIBIDA? Esto actualizará el stock de los productos.`,
+            'Sí, recibir',
+            'question'
+        );
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            await recibirCompra(id, empleadoId);
+            mostrarAlerta('Éxito', `La compra #${id} ha sido marcada como RECIBIDA.`, 'success');
+            if (onActionCompleted) onActionCompleted();
+        } catch (error) {
+            mostrarAlerta('Error', error.response?.data?.message || 'No se pudo recibir la compra.', 'error');
+        }
+    };
+
+    const handleAnular = async (id) => {
+        if (!empleadoId) {
+            mostrarAlerta('Error', 'No se ha podido obtener el empleado actual.', 'error');
+            return;
+        }
+        const confirmacion = await confirmarAccion(
+            '¿Anular Compra?',
+            `¿Está seguro de ANULAR la compra #${id}? Esta acción no se puede deshacer y revertirá los movimientos en stock e inventario si ya fue recibida.`,
+            'Sí, anular',
+            'warning'
+        );
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            await anularCompra(id, empleadoId);
+            mostrarAlerta('Éxito', `La compra #${id} ha sido ANULADA.`, 'success');
+            if (onActionCompleted) onActionCompleted();
+        } catch (error) {
+            mostrarAlerta('Error', error.response?.data?.message || 'No se pudo anular la compra.', 'error');
+        }
+    };
 
     const detalles = Array.isArray(compra.detalles) ? compra.detalles : [];
 
@@ -17,8 +73,9 @@ export default function ModalVerCompra({ compra, onCerrar }) {
     };
     const claseEstado = (est) => {
         const map = {
-            REGISTRADA: 'badge--registrada', ANULADA: 'badge--anulada',
-            PENDIENTE: 'badge--pendiente', COMPLETADA: 'badge--completada',
+            REGISTRADA: 'badge--registrada',
+            RECIBIDA: 'badge--completada',
+            ANULADA: 'badge--anulada',
         };
         return map[(est ?? '').toUpperCase()] ?? 'badge--otro';
     };
@@ -180,6 +237,23 @@ export default function ModalVerCompra({ compra, onCerrar }) {
 
                 {/* ── FOOTER ── */}
                 <div className="modal-footer">
+                    {compra.estado === 'REGISTRADA' && (
+                        <button
+                            className="btn-primary"
+                            style={{ backgroundColor: '#16a34a', borderColor: '#16a34a' }}
+                            onClick={() => handleRecibir(compra.id)}
+                        >
+                            Recibir Mercadería
+                        </button>
+                    )}
+                    {compra.estado !== 'ANULADA' && (
+                        <button
+                            className="btn-danger"
+                            onClick={() => handleAnular(compra.id)}
+                        >
+                            Anular Compra
+                        </button>
+                    )}
                     <button className="btn-secondary" onClick={onCerrar}>Cerrar</button>
                 </div>
             </div>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { listarCompras } from '../api/comprasService';
-import { mostrarAlerta } from '../utils/alerts';
+import { listarCompras, recibirCompra, anularCompra, getEmpleadoActual, buscarCompraPorId } from '../api/comprasService';
+import { mostrarAlerta, confirmarAccion } from '../utils/alerts';
 import ModalVerCompra from './compras/ModalVerCompra';
 import ModalCrearCompra from './compras/ModalCrearCompra';
 
-const ESTADOS = ['TODOS', 'REGISTRADA', 'ANULADA'];
+const ESTADOS = ['TODOS', 'REGISTRADA', 'RECIBIDA', 'ANULADA'];
 
 export default function Compras() {
     const [compras, setCompras] = useState([]);
@@ -13,6 +13,7 @@ export default function Compras() {
     const [mostrarCrear, setMostrarCrear] = useState(false);
     const [busqueda, setBusqueda] = useState('');
     const [filtroEstado, setFiltroEstado] = useState('TODOS');
+    const [empleadoId, setEmpleadoId] = useState(null);
 
     const cargarCompras = () => {
         setCargando(true);
@@ -22,7 +23,58 @@ export default function Compras() {
             .finally(() => setCargando(false));
     };
 
-    useEffect(() => { cargarCompras(); }, []);
+    useEffect(() => {
+        Promise.resolve().then(() => {
+            cargarCompras();
+            getEmpleadoActual()
+                .then(setEmpleadoId)
+                .catch(err => console.error('Error al obtener el empleado actual:', err));
+        });
+    }, []);
+
+    const handleRecibir = async (id) => {
+        if (!empleadoId) {
+            mostrarAlerta('Error', 'No se ha podido obtener el empleado actual.', 'error');
+            return;
+        }
+        const confirmacion = await confirmarAccion(
+            '¿Recibir Mercadería?',
+            `¿Está seguro de marcar la compra #${id} como RECIBIDA? Esto actualizará el stock de los productos.`,
+            'Sí, recibir',
+            'question'
+        );
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            await recibirCompra(id, empleadoId);
+            mostrarAlerta('Éxito', `La compra #${id} ha sido marcada como RECIBIDA.`, 'success');
+            cargarCompras();
+        } catch (error) {
+            mostrarAlerta('Error', error.response?.data?.message || 'No se pudo recibir la compra.', 'error');
+        }
+    };
+
+    const handleAnular = async (id) => {
+        if (!empleadoId) {
+            mostrarAlerta('Error', 'No se ha podido obtener el empleado actual.', 'error');
+            return;
+        }
+        const confirmacion = await confirmarAccion(
+            '¿Anular Compra?',
+            `¿Está seguro de ANULAR la compra #${id}? Esta acción no se puede deshacer y revertirá los movimientos en stock e inventario si ya fue recibida.`,
+            'Sí, anular',
+            'warning'
+        );
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            await anularCompra(id, empleadoId);
+            mostrarAlerta('Éxito', `La compra #${id} ha sido ANULADA.`, 'success');
+            cargarCompras();
+        } catch (error) {
+            mostrarAlerta('Error', error.response?.data?.message || 'No se pudo anular la compra.', 'error');
+        }
+    };
 
     const comprasFiltradas = compras.filter(c => {
         const q = busqueda.toLowerCase();
@@ -58,9 +110,8 @@ export default function Compras() {
     const claseEstado = (est) => {
         const map = {
             REGISTRADA: 'badge--registrada',
+            RECIBIDA: 'badge--completada',
             ANULADA: 'badge--anulada',
-            PENDIENTE: 'badge--pendiente',
-            COMPLETADA: 'badge--completada',
         };
         return map[(est ?? '').toUpperCase()] ?? 'badge--otro';
     };
@@ -192,17 +243,44 @@ export default function Compras() {
                                         </span>
                                     </td>
                                     <td>
-                                        <button
-                                            className="btn-icon view"
-                                            onClick={() => setCompraSeleccionada(c)}
-                                        >
-                                            <svg width="14" height="14" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" strokeWidth="2"
-                                                style={{ marginRight: 4 }}>
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                <circle cx="12" cy="12" r="3" />
-                                            </svg>
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                            <button
+                                                className="btn-icon view"
+                                                onClick={() => setCompraSeleccionada(c)}
+                                                title="Ver detalles"
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
+                                            {c.estado === 'REGISTRADA' && (
+                                                <button
+                                                    className="btn-icon view"
+                                                    style={{ color: '#16a34a', background: '#dcfce7', borderColor: '#bbf7d0' }}
+                                                    onClick={() => handleRecibir(c.id)}
+                                                    title="Recibir Mercadería"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                            {c.estado !== 'ANULADA' && (
+                                                <button
+                                                    className="btn-icon delete"
+                                                    style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 8px', borderRadius: '6px' }}
+                                                    onClick={() => handleAnular(c.id)}
+                                                    title="Anular Compra"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))
@@ -215,6 +293,12 @@ export default function Compras() {
                 <ModalVerCompra
                     compra={compraSeleccionada}
                     onCerrar={() => setCompraSeleccionada(null)}
+                    onActionCompleted={() => {
+                        cargarCompras();
+                        buscarCompraPorId(compraSeleccionada.id)
+                            .then(setCompraSeleccionada)
+                            .catch(() => setCompraSeleccionada(null));
+                    }}
                 />
             )}
 
