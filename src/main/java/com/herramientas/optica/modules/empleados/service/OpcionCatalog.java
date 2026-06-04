@@ -17,15 +17,15 @@ public final class OpcionCatalog {
                 new OpcionDefinition("Clientes y Ventas", null, "IconClientes", 20, null, true),
                 new OpcionDefinition("Inventario", null, "IconInventario", 30, null, true),
                 new OpcionDefinition("Proveedor/Compras", null, "IconCompras", 40, null, true),
-                new OpcionDefinition("Reportes", null, "IconDashboard", 50, null, true),
-                new OpcionDefinition("Gestión Web", null, "IconDashboard", 60, null, false),
+                new OpcionDefinition("Reportes", null, "IconReportes", 50, null, true),
+                new OpcionDefinition("Gestión Web", null, "IconGestionWeb", 60, null, false),
 
                 new OpcionDefinition("Listar Empleados", "/empleados", "IconEmpleados", 1, "Administración", true),
                 new OpcionDefinition("Perfiles", "/perfiles", "IconPerfiles", 2, "Administración", true),
                 new OpcionDefinition("Configuración Menú", "/configuracion-menu", "IconConfig", 3, "Administración", true),
 
                 new OpcionDefinition("Gestión Clientes", "/clientes", "IconClientes", 1, "Clientes y Ventas", true),
-                new OpcionDefinition("Caja Operativa", "/cajas", "IconDashboard", 2, "Clientes y Ventas", true),
+                new OpcionDefinition("Cajas Operativas", "/cajas", "IconDashboard", 2, "Clientes y Ventas", true),
                 new OpcionDefinition("Ventas Operativas", "/ventas", "IconVentas", 3, "Clientes y Ventas", true),
 
                 new OpcionDefinition("Inventario Operativo", "/inventario", "IconInventario", 1, "Inventario", true),

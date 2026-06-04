@@ -22,6 +22,7 @@ import ReporteKardex from "./pages/reportes/ReporteKardex";
 import ReporteVentas from "./pages/reportes/ReporteVentas";
 import ReporteCompras from "./pages/reportes/ReporteCompras";
 import ReporteCajas from "./pages/reportes/ReporteCajas";
+import EnProceso from "./pages/EnProceso";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -93,6 +94,51 @@ function App() {
           <Route path="reportes/kardex" element={<ReporteKardex />} />
           <Route path="reportes/ventas" element={<ReporteVentas />} />
           <Route path="reportes/compras" element={<ReporteCompras />} />
+          <Route
+            path="configuracion"
+            element={
+              <EnProceso
+                titulo="Configuración"
+                descripcion="Aquí se gestionará el cambio de contraseña y otros ajustes de cuenta."
+              />
+            }
+          />
+          <Route
+            path="catalogo-web"
+            element={
+              <EnProceso
+                titulo="Catálogo Web"
+                descripcion="La gestión del catálogo público se habilitará cuando el módulo web esté listo."
+              />
+            }
+          />
+          <Route
+            path="gestion-web/catalogo-web"
+            element={
+              <EnProceso
+                titulo="Catálogo Web"
+                descripcion="La gestión del catálogo público se habilitará cuando el módulo web esté listo."
+              />
+            }
+          />
+          <Route
+            path="cotizaciones"
+            element={
+              <EnProceso
+                titulo="Cotización"
+                descripcion="Esta pantalla mostrará las solicitudes y cotizaciones web cuando el flujo esté implementado."
+              />
+            }
+          />
+          <Route
+            path="gestion-web/cotizaciones"
+            element={
+              <EnProceso
+                titulo="Cotización"
+                descripcion="Esta pantalla mostrará las solicitudes y cotizaciones web cuando el flujo esté implementado."
+              />
+            }
+          />
           <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
           <Route path="compras" element={<Compras />} />
         </Route>

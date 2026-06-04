@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { CashCoin } from "react-bootstrap-icons";
+import { CashCoin, Gear } from "react-bootstrap-icons";
 import api from "../api/axiosConfig";
 import { Toast, confirmarAccion } from "../utils/alerts";
 import { IconDashboard } from "../components/ui/IconCatalog";
@@ -386,6 +386,26 @@ const MainLayout = ({ opciones = [], setToken }) => {
                   {username}
                 </p>
               </div>
+              <button
+                type="button"
+                title="Configuración"
+                aria-label="Configuración"
+                onClick={() => navigate("/configuracion")}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  border: "1px solid #e2e8f0",
+                  background: "#fff",
+                  color: "#475569",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <Gear />
+              </button>
               <span
                 style={{
                   padding: "3px 9px",

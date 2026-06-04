@@ -19,8 +19,8 @@ const ProtectedRoute = ({ children, opciones = [], loading }) => {
     }
 
     // 3. Validar si la ruta actual está permitida
-    // El dashboard principal (/) siempre está permitido
-    if (location.pathname === '/') {
+    // El dashboard principal y la configuración de cuenta siempre están permitidos con sesión activa.
+    if (location.pathname === '/' || location.pathname === '/configuracion') {
         return children;
     }
 
