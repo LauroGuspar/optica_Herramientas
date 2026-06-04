@@ -401,7 +401,7 @@ const MainLayout = ({ opciones = [], setToken }) => {
 
           {/* Página */}
           <section style={{ padding: esMovil ? "16px" : "28px 32px", overflowX: "hidden" }}>
-            <Outlet />
+            <Outlet context={{ cajaActual, cargarCajaActual, abrirModalCaja: () => setModalCajaAbierto(true) }} />
           </section>
         </main>
       </div>
