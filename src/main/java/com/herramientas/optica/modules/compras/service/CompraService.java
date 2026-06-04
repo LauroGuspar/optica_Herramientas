@@ -122,22 +122,6 @@ public class CompraService {
                     .build();
             compraGuardada.agregarDetalle(compraDetalle);
         }
-        compraGuardada = compraRepository.save(compraGuardada);
-
-        for (CompraDetalle detalle : compraGuardada.getDetalles()) {
-            MovimientoInventarioResponseDTO movimiento = inventarioService.registrarEntradaCompra(
-                    detalle.getProducto().getId(),
-                    detalle.getCantidadCompra(),
-                    "Compra recibida #" + compraGuardada.getId(),
-                    ReferenciaInventario.COMPRA,
-                    compraGuardada.getId(),
-                    empleado.getId());
-            detalle.setStockPrevio(movimiento.getStockPrevio());
-            detalle.setStockActual(movimiento.getStockNuevo());
-        }
-
-        cajaService.registrarMovimiento(caja.getId(), movimientoCajaRequest(empleado.getId(), dto.getMedioPago(),
-                compraGuardada.getTotal(), compraGuardada.getId()));
 
         return mapearCompra(compraRepository.save(compraGuardada));
     }

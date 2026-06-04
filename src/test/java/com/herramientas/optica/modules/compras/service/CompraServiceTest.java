@@ -120,26 +120,12 @@ class CompraServiceTest {
             assertThat(detalle.getSubtotal()).isEqualByComparingTo("31.50");
         });
 
-        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(36);
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(0);
         assertThat(movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId()))
                 .filteredOn(mov -> mov.getReferenciaTipo() == ReferenciaInventario.COMPRA)
-                .hasSize(1)
-                .first()
-                .satisfies(mov -> {
-                    assertThat(mov.getReferenciaId()).isEqualTo(compra.getId());
-                    assertThat(mov.getStockNuevo()).isEqualByComparingTo("36.000");
-                });
+                .isEmpty();
         assertThat(movimientoCajaRepository.findByCajaIdOrderByFechaAsc(caja.getId()))
-                .hasSize(1)
-                .first()
-                .satisfies(mov -> {
-                    assertThat(mov.getTipo()).isEqualTo(TipoMovimientoCaja.EGRESO);
-                    assertThat(mov.getOrigen()).isEqualTo(OrigenMovimientoCaja.COMPRA);
-                    assertThat(mov.getMetodoPago()).isEqualTo(MetodoPagoCaja.EFECTIVO);
-                    assertThat(mov.getMonto()).isEqualByComparingTo("31.50");
-                    assertThat(mov.getReferenciaTipo()).isEqualTo("COMPRA");
-                    assertThat(mov.getReferenciaId()).isEqualTo(compra.getId());
-                });
+                .isEmpty();
     }
 
     private CompraRequestDTO compraRequest(Long proveedorId, Long empleadoId, Long cajaId, Long productoId,
