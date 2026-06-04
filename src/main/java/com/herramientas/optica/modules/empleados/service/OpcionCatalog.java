@@ -17,7 +17,7 @@ public final class OpcionCatalog {
                 new OpcionDefinition("Clientes y Ventas", null, "IconClientes", 20, null, true),
                 new OpcionDefinition("Inventario", null, "IconInventario", 30, null, true),
                 new OpcionDefinition("Proveedor/Compras", null, "IconCompras", 40, null, true),
-                new OpcionDefinition("Reportes", null, "IconDashboard", 50, null, false),
+                new OpcionDefinition("Reportes", null, "IconDashboard", 50, null, true),
                 new OpcionDefinition("Gestión Web", null, "IconDashboard", 60, null, false),
 
                 new OpcionDefinition("Listar Empleados", "/empleados", "IconEmpleados", 1, "Administración", true),
@@ -25,8 +25,8 @@ public final class OpcionCatalog {
                 new OpcionDefinition("Configuración Menú", "/configuracion-menu", "IconConfig", 3, "Administración", true),
 
                 new OpcionDefinition("Gestión Clientes", "/clientes", "IconClientes", 1, "Clientes y Ventas", true),
-                new OpcionDefinition("Caja", "/cajas", "IconDashboard", 2, "Clientes y Ventas", true),
-                new OpcionDefinition("Ventas", "/ventas", "IconVentas", 3, "Clientes y Ventas", true),
+                new OpcionDefinition("Caja Operativa", "/cajas", "IconDashboard", 2, "Clientes y Ventas", true),
+                new OpcionDefinition("Ventas Operativas", "/ventas", "IconVentas", 3, "Clientes y Ventas", true),
 
                 new OpcionDefinition("Inventario Operativo", "/inventario", "IconInventario", 1, "Inventario", true),
                 new OpcionDefinition("Productos", "/productos", "IconInventario", 2, "Inventario", true),
@@ -37,11 +37,11 @@ public final class OpcionCatalog {
                 new OpcionDefinition("Proveedor", "/proveedores", "IconDashboard", 1, "Proveedor/Compras", true),
                 new OpcionDefinition("Compras", "/compras", "IconCompras", 2, "Proveedor/Compras", true),
 
-                new OpcionDefinition("Caja Diaria", "/reportes/caja-diaria", "IconDashboard", 1, "Reportes", false),
-                new OpcionDefinition("Kardex", "/reportes/kardex", "IconInventario", 2, "Reportes", false),
-                new OpcionDefinition("Ventas por Fecha", "/reportes/ventas", "IconVentas", 3, "Reportes", false),
-                new OpcionDefinition("Compras por Proveedor", "/reportes/compras", "IconCompras", 4, "Reportes", false),
-                new OpcionDefinition("Productos Bajo Stock", "/reportes/bajo-stock", "IconInventario", 5, "Reportes", false),
+                new OpcionDefinition("Caja", "/reportes/caja", "IconDashboard", 1, "Reportes", true),
+                new OpcionDefinition("Kardex", "/reportes/kardex", "IconInventario", 2, "Reportes", true),
+                new OpcionDefinition("Ventas", "/reportes/ventas", "IconVentas", 3, "Reportes", true),
+                new OpcionDefinition("Compras por Proveedor", "/reportes/compras", "IconCompras", 4, "Reportes", true),
+                //new OpcionDefinition("Productos Bajo Stock", "/reportes/bajo-stock", "IconInventario", 5, "Reportes", false),
 
                 new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 1, "Gestión Web", false),
                 new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", false));
