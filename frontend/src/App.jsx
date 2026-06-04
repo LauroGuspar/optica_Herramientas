@@ -15,6 +15,8 @@ import Categorias from "./pages/Categorias";
 import Unidades from "./pages/Unidades";
 import Inventario from "./pages/Inventario"; 
 import Proveedores from "./pages/Proveedores";
+import Ventas from "./pages/Ventas";
+import ReporteDiarioCaja from "./pages/caja/ReporteDiarioCaja";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -38,12 +40,15 @@ function App() {
   };
 
   useEffect(() => {
-    if (token) {
-      cargarOpciones();
-    } else {
-      setOpciones([]);
-      setLoading(false);
-    }
+    const timer = window.setTimeout(() => {
+      if (token) {
+        cargarOpciones();
+      } else {
+        setOpciones([]);
+        setLoading(false);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [token]);
 
   return (
@@ -77,6 +82,8 @@ function App() {
           <Route path="unidades" element={<Unidades />} />
           <Route path="inventario" element={<Inventario />} />
           <Route path="proveedores" element={<Proveedores />} />
+          <Route path="ventas" element={<Ventas />} />
+          <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />

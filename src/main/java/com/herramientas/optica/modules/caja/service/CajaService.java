@@ -1,8 +1,11 @@
 package com.herramientas.optica.modules.caja.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,8 @@ import com.herramientas.optica.modules.caja.dto.GastoRequestDTO;
 import com.herramientas.optica.modules.caja.dto.GastoResponseDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaRequestDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaResponseDTO;
+import com.herramientas.optica.modules.caja.dto.ReporteDiarioCajaResponseDTO;
+import com.herramientas.optica.modules.caja.dto.VentaReporteDiarioDTO;
 import com.herramientas.optica.modules.caja.model.Caja;
 import com.herramientas.optica.modules.caja.model.EstadoCaja;
 import com.herramientas.optica.modules.caja.model.EstadoGasto;
@@ -25,23 +30,31 @@ import com.herramientas.optica.modules.caja.model.TipoMovimientoCaja;
 import com.herramientas.optica.modules.caja.repository.CajaRepository;
 import com.herramientas.optica.modules.caja.repository.GastoRepository;
 import com.herramientas.optica.modules.caja.repository.MovimientoCajaRepository;
+import com.herramientas.optica.modules.clientes.model.Cliente;
 import com.herramientas.optica.modules.empleados.model.Empleado;
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
+import com.herramientas.optica.modules.ventas.model.EstadoVenta;
+import com.herramientas.optica.modules.ventas.model.Venta;
+import com.herramientas.optica.modules.ventas.repository.VentaRepository;
 
 @Service
 public class CajaService {
+
+    private static final String MEDIO_PAGO_SIN_MEDIO = "SIN_MEDIO";
 
     private final CajaRepository cajaRepository;
     private final MovimientoCajaRepository movimientoCajaRepository;
     private final GastoRepository gastoRepository;
     private final EmpleadoRepository empleadoRepository;
+    private final VentaRepository ventaRepository;
 
     public CajaService(CajaRepository cajaRepository, MovimientoCajaRepository movimientoCajaRepository,
-            GastoRepository gastoRepository, EmpleadoRepository empleadoRepository) {
+            GastoRepository gastoRepository, EmpleadoRepository empleadoRepository, VentaRepository ventaRepository) {
         this.cajaRepository = cajaRepository;
         this.movimientoCajaRepository = movimientoCajaRepository;
         this.gastoRepository = gastoRepository;
         this.empleadoRepository = empleadoRepository;
+        this.ventaRepository = ventaRepository;
     }
 
     /**
@@ -84,6 +97,41 @@ public class CajaService {
         return movimientoCajaRepository.findByCajaIdOrderByFechaAsc(cajaId).stream()
                 .map(this::mapearMovimiento)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ReporteDiarioCajaResponseDTO obtenerReporteDiario(Long cajaId) {
+        Caja caja = obtenerCaja(cajaId);
+        LocalDate diaApertura = caja.getFechaApertura().toLocalDate();
+        LocalDateTime desde = diaApertura.atStartOfDay();
+        LocalDateTime hasta = diaApertura.plusDays(1).atStartOfDay().minusNanos(1);
+        List<Venta> ventas = ventaRepository.findByCajaIdAndFechaBetweenAndEstadoOrderByFechaAsc(
+                cajaId, desde, hasta, EstadoVenta.EMITIDA.getCodigo());
+        List<VentaReporteDiarioDTO> ventasReporte = ventas.stream()
+                .map(this::mapearVentaReporteDiario)
+                .toList();
+
+        BigDecimal totalVentas = BigDecimal.ZERO;
+        Map<String, BigDecimal> totalPorMedioPago = new LinkedHashMap<>();
+        for (Venta venta : ventas) {
+            BigDecimal totalVenta = montoReporte(venta.getTotal());
+            totalVentas = totalVentas.add(totalVenta);
+            totalPorMedioPago.merge(medioPagoReporte(venta), totalVenta, BigDecimal::add);
+        }
+
+        return ReporteDiarioCajaResponseDTO.builder()
+                .cajaId(caja.getId())
+                .empleadoId(caja.getEmpleado().getId())
+                .empleadoNombre(nombreCompleto(caja.getEmpleado()))
+                .fechaApertura(caja.getFechaApertura())
+                .fechaCierre(caja.getFechaCierre())
+                .estadoCaja(caja.getEstado())
+                .montoInicial(caja.getMontoInicial())
+                .totalVentas(totalVentas)
+                .cantidadVentas(ventas.size())
+                .totalPorMedioPago(totalPorMedioPago)
+                .ventas(ventasReporte)
+                .build();
     }
 
     /**
@@ -314,6 +362,37 @@ public class CajaService {
                 .fecha(gasto.getFecha())
                 .estado(gasto.getEstado())
                 .build();
+    }
+
+    private VentaReporteDiarioDTO mapearVentaReporteDiario(Venta venta) {
+        return VentaReporteDiarioDTO.builder()
+                .ventaId(venta.getId())
+                .fecha(venta.getFecha())
+                .clienteNombre(nombreCliente(venta.getCliente()))
+                .medioPago(medioPagoReporte(venta))
+                .subtotal(montoReporte(venta.getSubtotal()))
+                .descuento(montoReporte(venta.getDescuento()))
+                .total(montoReporte(venta.getTotal()))
+                .numeroComprobante(venta.getNumeroComprobante())
+                .build();
+    }
+
+    private String medioPagoReporte(Venta venta) {
+        return venta.getMedioPago() != null ? venta.getMedioPago().name() : MEDIO_PAGO_SIN_MEDIO;
+    }
+
+    private BigDecimal montoReporte(BigDecimal monto) {
+        return monto != null ? monto : BigDecimal.ZERO;
+    }
+
+    private String nombreCliente(Cliente cliente) {
+        if (cliente.getNombreEmpresa() != null && !cliente.getNombreEmpresa().isBlank()) {
+            return cliente.getNombreEmpresa().trim();
+        }
+        return String.join(" ",
+                cliente.getNombre() != null ? cliente.getNombre() : "",
+                cliente.getApellidoPaterno() != null ? cliente.getApellidoPaterno() : "",
+                cliente.getApellidoMaterno() != null ? cliente.getApellidoMaterno() : "").trim();
     }
 
     private String nombreCompleto(Empleado empleado) {

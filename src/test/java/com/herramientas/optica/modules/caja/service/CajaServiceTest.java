@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +19,30 @@ import com.herramientas.optica.modules.caja.dto.GastoRequestDTO;
 import com.herramientas.optica.modules.caja.dto.GastoResponseDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaRequestDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaResponseDTO;
+import com.herramientas.optica.modules.caja.dto.ReporteDiarioCajaResponseDTO;
+import com.herramientas.optica.modules.caja.model.Caja;
 import com.herramientas.optica.modules.caja.model.EstadoCaja;
 import com.herramientas.optica.modules.caja.model.EstadoGasto;
 import com.herramientas.optica.modules.caja.model.MetodoPagoCaja;
 import com.herramientas.optica.modules.caja.model.OrigenMovimientoCaja;
 import com.herramientas.optica.modules.caja.model.TipoMovimientoCaja;
+import com.herramientas.optica.modules.caja.repository.CajaRepository;
 import com.herramientas.optica.modules.caja.repository.MovimientoCajaRepository;
+import com.herramientas.optica.modules.clientes.model.Cliente;
+import com.herramientas.optica.modules.clientes.model.TipoDocumento;
+import com.herramientas.optica.modules.clientes.repository.ClienteRepository;
+import com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository;
 import com.herramientas.optica.modules.empleados.model.Empleado;
 import com.herramientas.optica.modules.empleados.model.Perfil;
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
 import com.herramientas.optica.modules.empleados.repository.PerfilRepository;
+import com.herramientas.optica.modules.ventas.model.EstadoVenta;
+import com.herramientas.optica.modules.ventas.model.FormaPagoVenta;
+import com.herramientas.optica.modules.ventas.model.MedioPagoVenta;
+import com.herramientas.optica.modules.ventas.model.Venta;
+import com.herramientas.optica.modules.ventas.repository.VentaRepository;
+
+import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -41,10 +56,25 @@ class CajaServiceTest {
     private MovimientoCajaRepository movimientoCajaRepository;
 
     @Autowired
+    private CajaRepository cajaRepository;
+
+    @Autowired
+    private VentaRepository ventaRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private TipoDocumentoRepository tipoDocumentoRepository;
+
+    @Autowired
     private EmpleadoRepository empleadoRepository;
 
     @Autowired
     private PerfilRepository perfilRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     void abrirCajaCreaCajaAbiertaConMontoInicial() {
@@ -133,6 +163,99 @@ class CajaServiceTest {
         assertThat(cierre.getDiferencia()).isEqualByComparingTo("5.00");
     }
 
+    @Test
+    void obtenerReporteDiarioIncluyeVentasEmitidasDelDiaDeApertura() {
+        Empleado empleado = crearEmpleado("cajero_reporte");
+        Cliente cliente = crearCliente("71000001", "Cliente Reporte");
+        CajaResponseDTO cajaResponse = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "80.00"));
+        Caja caja = cajaRepository.findById(cajaResponse.getId()).orElseThrow();
+        LocalDateTime fechaVenta = caja.getFechaApertura()
+                .withHour(12)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        Venta venta = ventaRepository.save(Venta.builder()
+                .cliente(cliente)
+                .empleado(empleado)
+                .caja(caja)
+                .fecha(fechaVenta)
+                .numeroComprobante("B001-000123")
+                .formaPago(FormaPagoVenta.CONTADO)
+                .medioPago(MedioPagoVenta.YAPE)
+                .subtotal(new BigDecimal("120.00"))
+                .descuento(new BigDecimal("10.00"))
+                .total(new BigDecimal("110.00"))
+                .estado(EstadoVenta.EMITIDA.getCodigo())
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        ReporteDiarioCajaResponseDTO reporte = cajaService.obtenerReporteDiario(caja.getId());
+
+        assertThat(reporte.getCajaId()).isEqualTo(caja.getId());
+        assertThat(reporte.getEmpleadoId()).isEqualTo(empleado.getId());
+        assertThat(reporte.getEmpleadoNombre()).isEqualTo("Cajero Prueba Caja");
+        assertThat(reporte.getFechaApertura()).isEqualToIgnoringNanos(caja.getFechaApertura());
+        assertThat(reporte.getEstadoCaja()).isEqualTo(EstadoCaja.ABIERTA);
+        assertThat(reporte.getMontoInicial()).isEqualByComparingTo("80.00");
+        assertThat(reporte.getCantidadVentas()).isEqualTo(1);
+        assertThat(reporte.getTotalVentas()).isEqualByComparingTo("110.00");
+        assertThat(reporte.getTotalPorMedioPago()).containsOnlyKeys("YAPE");
+        assertThat(reporte.getTotalPorMedioPago().get("YAPE")).isEqualByComparingTo("110.00");
+        assertThat(reporte.getVentas()).hasSize(1).first().satisfies(ventaReporte -> {
+            assertThat(ventaReporte.getVentaId()).isEqualTo(venta.getId());
+            assertThat(ventaReporte.getFecha()).isEqualTo(venta.getFecha());
+            assertThat(ventaReporte.getClienteNombre()).isEqualTo("Cliente Reporte Test");
+            assertThat(ventaReporte.getMedioPago()).isEqualTo("YAPE");
+            assertThat(ventaReporte.getSubtotal()).isEqualByComparingTo("120.00");
+            assertThat(ventaReporte.getDescuento()).isEqualByComparingTo("10.00");
+            assertThat(ventaReporte.getTotal()).isEqualByComparingTo("110.00");
+            assertThat(ventaReporte.getNumeroComprobante()).isEqualTo("B001-000123");
+        });
+    }
+
+    @Test
+    void obtenerReporteDiarioToleraVentasLegacyConMontosYMedioPagoNulos() {
+        Empleado empleado = crearEmpleado("cajero_reporte_legacy");
+        Cliente cliente = crearCliente("71000002", "Cliente Legacy");
+        CajaResponseDTO cajaResponse = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "80.00"));
+        Caja caja = cajaRepository.findById(cajaResponse.getId()).orElseThrow();
+        LocalDateTime fechaVenta = caja.getFechaApertura()
+                .withHour(12)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        Venta venta = ventaRepository.save(Venta.builder()
+                .cliente(cliente)
+                .empleado(empleado)
+                .caja(caja)
+                .fecha(fechaVenta)
+                .numeroComprobante("B001-000124")
+                .formaPago(FormaPagoVenta.CONTADO)
+                .medioPago(null)
+                .subtotal(null)
+                .descuento(null)
+                .total(null)
+                .estado(EstadoVenta.EMITIDA.getCodigo())
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        ReporteDiarioCajaResponseDTO reporte = cajaService.obtenerReporteDiario(caja.getId());
+
+        assertThat(reporte.getCantidadVentas()).isEqualTo(1);
+        assertThat(reporte.getTotalVentas()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(reporte.getTotalPorMedioPago()).containsOnlyKeys("SIN_MEDIO");
+        assertThat(reporte.getTotalPorMedioPago().get("SIN_MEDIO")).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(reporte.getVentas()).hasSize(1).first().satisfies(ventaReporte -> {
+            assertThat(ventaReporte.getVentaId()).isEqualTo(venta.getId());
+            assertThat(ventaReporte.getMedioPago()).isEqualTo("SIN_MEDIO");
+            assertThat(ventaReporte.getSubtotal()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(ventaReporte.getDescuento()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(ventaReporte.getTotal()).isEqualByComparingTo(BigDecimal.ZERO);
+        });
+    }
+
     private Empleado crearEmpleado(String username) {
         Perfil perfil = perfilRepository.save(Perfil.builder()
                 .nombre("PERFIL_" + username)
@@ -154,6 +277,24 @@ class CajaServiceTest {
                 .perfil(perfil)
                 .idTipoDocumento(1L)
                 .idEmpresa(1L)
+                .build());
+    }
+
+    private Cliente crearCliente(String documento, String nombre) {
+        TipoDocumento tipoDocumento = tipoDocumentoRepository.save(TipoDocumento.builder()
+                .nombre("DNI CAJA " + documento)
+                .build());
+
+        return clienteRepository.save(Cliente.builder()
+                .nombre(nombre)
+                .apellidoPaterno("Test")
+                .apellidoMaterno("")
+                .correo(documento + "@example.test")
+                .telefono("987654321")
+                .direccion("Direccion cliente")
+                .numeroDocumento(documento)
+                .tipoDocumento(tipoDocumento)
+                .estado(1)
                 .build());
     }
 

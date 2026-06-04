@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { CashCoin } from "react-bootstrap-icons";
+import api from "../api/axiosConfig";
 import { Toast, confirmarAccion } from "../utils/alerts";
 import { IconDashboard } from "../components/ui/IconCatalog";
 import { iconMap } from "../utils/iconUtils";
+import CajaHeaderModal from "../pages/caja/CajaHeaderModal";
 
 // ── Iconos SVG inline (Específicos de Layout) ───────────────────────
 const IconLogout = () => (
@@ -42,10 +45,13 @@ const MainLayout = ({ opciones = [], setToken }) => {
   const location = useLocation();
   const username = localStorage.getItem("username");
   const rol = localStorage.getItem("rol");
+  const empleadoId = localStorage.getItem("empleadoId");
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [esMovil, setEsMovil] = useState(window.innerWidth <= 768);
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
+  const [cajaActual, setCajaActual] = useState(null);
+  const [modalCajaAbierto, setModalCajaAbierto] = useState(false);
 
   const toggleSeccion = (id) => {
     setSeccionesAbiertas((prev) => ({
@@ -73,8 +79,36 @@ const MainLayout = ({ opciones = [], setToken }) => {
   }, []);
 
   useEffect(() => {
-    if (esMovil) setMenuAbierto(false);
+    if (!esMovil) return undefined;
+    const timer = window.setTimeout(() => setMenuAbierto(false), 0);
+    return () => window.clearTimeout(timer);
   }, [location.pathname, esMovil]);
+
+  const cargarCajaActual = useCallback(async ({ silencioso = false } = {}) => {
+    if (!empleadoId) {
+      setCajaActual(null);
+      if (!silencioso) {
+        Toast.fire({ icon: "warning", title: "No se encontro el empleado de la sesion" });
+      }
+      return;
+    }
+    try {
+      const response = await api.get(`/api/v1/cajas/actual?empleadoId=${empleadoId}`);
+      setCajaActual(response.data);
+    } catch (error) {
+      setCajaActual(null);
+      if (!silencioso && error.response?.status !== 404) {
+        Toast.fire({ icon: "error", title: error.response?.data?.message || "No se pudo cargar la caja actual" });
+      }
+    }
+  }, [empleadoId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      cargarCajaActual({ silencioso: true });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [cargarCajaActual]);
 
   const handleLogout = async () => {
     const result = await confirmarAccion(
@@ -89,6 +123,11 @@ const MainLayout = ({ opciones = [], setToken }) => {
       Toast.fire({ icon: "info", title: "Sesión cerrada. ¡Hasta pronto!" });
       navigate("/login");
     }
+  };
+
+  const abrirReporteDiario = () => {
+    setModalCajaAbierto(false);
+    navigate("/cajas/reporte-diario");
   };
 
   const css = `
@@ -309,6 +348,28 @@ const MainLayout = ({ opciones = [], setToken }) => {
             )}
 
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  cargarCajaActual({ silencioso: true });
+                  setModalCajaAbierto(true);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  padding: "7px 11px",
+                  borderRadius: 8,
+                  border: cajaActual ? "1px solid #bbf7d0" : "1px solid #bfdbfe",
+                  background: cajaActual ? "#f0fdf4" : "#eff6ff",
+                  color: cajaActual ? "#166534" : "#1d4ed8",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <CashCoin /> {cajaActual ? "Caja abierta" : "Caja"}
+              </button>
               <div
                 style={{
                   width: 30, height: 30, borderRadius: "50%",
@@ -344,6 +405,14 @@ const MainLayout = ({ opciones = [], setToken }) => {
           </section>
         </main>
       </div>
+      <CajaHeaderModal
+        abierto={modalCajaAbierto}
+        onCerrar={() => setModalCajaAbierto(false)}
+        cajaActual={cajaActual}
+        empleadoId={empleadoId}
+        onCajaActualizada={(caja) => setCajaActual(caja)}
+        onVerReporte={abrirReporteDiario}
+      />
     </>
   );
 };

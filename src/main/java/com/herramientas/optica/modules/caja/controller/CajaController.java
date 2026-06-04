@@ -19,6 +19,7 @@ import com.herramientas.optica.modules.caja.dto.GastoRequestDTO;
 import com.herramientas.optica.modules.caja.dto.GastoResponseDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaRequestDTO;
 import com.herramientas.optica.modules.caja.dto.MovimientoCajaResponseDTO;
+import com.herramientas.optica.modules.caja.dto.ReporteDiarioCajaResponseDTO;
 import com.herramientas.optica.modules.caja.service.CajaService;
 
 import jakarta.validation.Valid;
@@ -46,6 +47,11 @@ public class CajaController {
     @GetMapping("/{id}")
     public ResponseEntity<CajaResponseDTO> buscarCaja(@PathVariable Long id) {
         return ResponseEntity.ok(cajaService.buscarCaja(id));
+    }
+
+    @GetMapping("/{id}/reporte-diario")
+    public ResponseEntity<ReporteDiarioCajaResponseDTO> obtenerReporteDiario(@PathVariable Long id) {
+        return ResponseEntity.ok(cajaService.obtenerReporteDiario(id));
     }
 
     @GetMapping("/{id}/movimientos")
