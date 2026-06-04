@@ -4,6 +4,7 @@ import { XCircleFill, Save2Fill } from "react-bootstrap-icons";
 import { Toast } from "../../utils/alerts";
 
 const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
+  const [errores, setErrores] = useState({});
   const [formulario, setFormulario] = useState({
     idTipoDocumento: "1",
     numeroDocumento: "",
@@ -25,6 +26,7 @@ const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
         telefono: proveedor.telefono || "",
         correo: proveedor.correo || ""
       });
+      setErrores({});
     }
   }, [proveedor]);
 
@@ -32,11 +34,43 @@ const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormulario({ ...formulario, [name]: value });
+    const nuevoValor = name === "numeroDocumento"
+      ? value.replace(/\D/g, "").slice(0, 11)
+      : name === "telefono"
+      ? value.replace(/\D/g, "").slice(0, 30)
+      : value;
+    setFormulario({ ...formulario, [name]: nuevoValor });
+    if (errores[name]) {
+      setErrores({ ...errores, [name]: null });
+    }
+  };
+
+  const validarFormulario = () => {
+    const nuevosErrores = {};
+
+    if (!formulario.razonSocial.trim()) {
+      nuevosErrores.razonSocial = "La razón social debe venir de la consulta RUC.";
+    }
+    if (!formulario.nombreComercial.trim()) {
+      nuevosErrores.nombreComercial = "El nombre comercial debe venir de la consulta RUC.";
+    }
+    if (!formulario.direccion.trim()) {
+      nuevosErrores.direccion = "La dirección es obligatoria.";
+    }
+    if (!formulario.telefono.trim()) {
+      nuevosErrores.telefono = "El teléfono es obligatorio.";
+    } else if (formulario.telefono.trim().length < 6) {
+      nuevosErrores.telefono = "El teléfono debe tener al menos 6 dígitos.";
+    }
+
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
   };
 
   const handleActualizar = async (e) => {
     e.preventDefault();
+    if (!validarFormulario()) return;
+
     try {
       const token = localStorage.getItem("token");
       const payload = {
@@ -64,8 +98,23 @@ const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
     formGroup: { marginBottom: "15px", display: "flex", flexDirection: "column", gap: "5px" },
     label: { fontSize: "13px", fontWeight: "600", color: "#475569" },
     input: { padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none" },
+    inputError: { borderColor: "#ef4444" },
+    inputDisabled: { backgroundColor: "#f1f5f9", color: "#64748b", cursor: "not-allowed" },
+    errorText: { color: "#dc2626", fontSize: "11px", fontWeight: "600" },
     footer: { display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "25px", borderTop: "1px solid #e2e8f0", paddingTop: "15px" }
   };
+
+  const inputStyle = (campo, extra = {}) => ({
+    ...styles.input,
+    ...(errores[campo] ? styles.inputError : {}),
+    ...extra
+  });
+
+  const disabledInputStyle = (campo) => inputStyle(campo, styles.inputDisabled);
+
+  const msgError = (campo) => errores[campo] && (
+    <span style={styles.errorText}>{errores[campo]}</span>
+  );
 
   return (
     <div style={styles.overlay}>
@@ -93,23 +142,27 @@ const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Razón Social</label>
-            <input type="text" name="razonSocial" style={styles.input} required value={formulario.razonSocial} onChange={handleInputChange} />
+            <input type="text" name="razonSocial" style={disabledInputStyle("razonSocial")} required value={formulario.razonSocial} disabled />
+            {msgError("razonSocial")}
           </div>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Nombre Comercial</label>
-            <input type="text" name="nombreComercial" style={styles.input} value={formulario.nombreComercial} onChange={handleInputChange} />
+            <input type="text" name="nombreComercial" style={disabledInputStyle("nombreComercial")} value={formulario.nombreComercial} disabled />
+            {msgError("nombreComercial")}
           </div>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Dirección</label>
-            <input type="text" name="direccion" style={styles.input} value={formulario.direccion} onChange={handleInputChange} />
+            <input type="text" name="direccion" style={disabledInputStyle("direccion")} value={formulario.direccion} disabled />
+            {msgError("direccion")}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Teléfono</label>
-              <input type="text" name="telefono" style={styles.input} value={formulario.telefono} onChange={handleInputChange} />
+              <input type="text" name="telefono" style={inputStyle("telefono")} value={formulario.telefono} onChange={handleInputChange} />
+              {msgError("telefono")}
             </div>
             <div style={styles.formGroup}>
               <label style={styles.label}>Correo Electrónico</label>
