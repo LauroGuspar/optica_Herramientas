@@ -22,8 +22,14 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     long countByMarcaIdAndEstadoNot(Long marcaId, Integer estado);
 
-    long countByUnidadVentaIdOrUnidadCompraIdAndEstadoNot(Integer unidadVentaId, Integer unidadCompraId,
-            Integer estado);
+    @Query("""
+            SELECT COUNT(p)
+            FROM Producto p
+            WHERE (p.unidadVenta.id = :unidadId OR p.unidadCompra.id = :unidadId)
+              AND p.estado <> :estadoBorrado
+            """)
+    long countByUnidadIdAndEstadoNot(@Param("unidadId") Integer unidadId,
+            @Param("estadoBorrado") Integer estadoBorrado);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "UPDATE producto SET id_marca = :destinoId WHERE id_marca = :origenId AND produc_estado <> :estadoBorrado", nativeQuery = true)

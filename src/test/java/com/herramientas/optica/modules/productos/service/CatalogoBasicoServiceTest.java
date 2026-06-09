@@ -157,6 +157,70 @@ class CatalogoBasicoServiceTest {
                 .hasMessageContaining("destino debe estar activa");
     }
 
+    @Test
+    void listarMarcasGestionIncluyeCantidadProductosActivosRelacionados() {
+        Categoria categoria = categoriaRepository.save(Categoria.builder().nombre("CAT CONTEO MARCA").estado(1).build());
+        Marca marca = marcaRepository.save(Marca.builder().nombre("MARCA CONTEO").estado(1).build());
+        Unidad unidad = unidadRepository.save(Unidad.builder().nombre("UND CONTEO MARCA").estado(1).build());
+        productoRepository.save(producto("PRODUCTO MARCA ACTIVO", categoria, marca, unidad));
+        Producto borrado = producto("PRODUCTO MARCA BORRADO", categoria, marca, unidad);
+        borrado.setEstado(0);
+        productoRepository.save(borrado);
+
+        var response = marcaService.listarGestion().stream()
+                .filter(item -> item.getId().equals(marca.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(response.getCantidadProductosRelacionados()).isEqualTo(1);
+    }
+
+    @Test
+    void listarCategoriasGestionIncluyeCantidadProductosActivosRelacionados() {
+        Categoria categoria = categoriaRepository.save(Categoria.builder().nombre("CAT CONTEO").estado(1).build());
+        Marca marca = marcaRepository.save(Marca.builder().nombre("MARCA CONTEO CAT").estado(1).build());
+        Unidad unidad = unidadRepository.save(Unidad.builder().nombre("UND CONTEO CAT").estado(1).build());
+        productoRepository.save(producto("PRODUCTO CAT ACTIVO", categoria, marca, unidad));
+        Producto borrado = producto("PRODUCTO CAT BORRADO", categoria, marca, unidad);
+        borrado.setEstado(0);
+        productoRepository.save(borrado);
+
+        var response = categoriaService.listarGestion().stream()
+                .filter(item -> item.getId().equals(categoria.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(response.getCantidadProductosRelacionados()).isEqualTo(1);
+    }
+
+    @Test
+    void listarUnidadesGestionCuentaCompraOVentaExcluyendoProductosBorrados() {
+        Categoria categoria = categoriaRepository.save(Categoria.builder().nombre("CAT CONTEO UND").estado(1).build());
+        Marca marca = marcaRepository.save(Marca.builder().nombre("MARCA CONTEO UND").estado(1).build());
+        Unidad unidad = unidadRepository.save(Unidad.builder().nombre("UND CONTEO").estado(1).build());
+        Unidad otraUnidad = unidadRepository.save(Unidad.builder().nombre("UND CONTEO OTRA").estado(1).build());
+
+        Producto productoVenta = producto("PRODUCTO UND VENTA", categoria, marca, unidad);
+        productoVenta.setUnidadCompra(otraUnidad);
+        productoRepository.save(productoVenta);
+
+        Producto productoCompra = producto("PRODUCTO UND COMPRA", categoria, marca, otraUnidad);
+        productoCompra.setUnidadCompra(unidad);
+        productoRepository.save(productoCompra);
+
+        Producto borradoConUnidadVenta = producto("PRODUCTO UND BORRADO", categoria, marca, unidad);
+        borradoConUnidadVenta.setUnidadCompra(otraUnidad);
+        borradoConUnidadVenta.setEstado(0);
+        productoRepository.save(borradoConUnidadVenta);
+
+        var response = unidadService.listarGestion().stream()
+                .filter(item -> item.getId().equals(unidad.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(response.getCantidadProductosRelacionados()).isEqualTo(2);
+    }
+
     private MarcaRequestDTO marcaRequest(String nombre) {
         MarcaRequestDTO dto = new MarcaRequestDTO();
         dto.setNombre(nombre);

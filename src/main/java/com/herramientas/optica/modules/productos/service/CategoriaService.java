@@ -157,6 +157,7 @@ public class CategoriaService {
                 .id(categoria.getId())
                 .nombre(categoria.getNombre())
                 .estado(categoria.getEstado())
+                .cantidadProductosRelacionados(productoRepository.countByCategoriaIdAndEstadoNot(categoria.getId(), ESTADO_BORRADO))
                 .build();
     }
 }

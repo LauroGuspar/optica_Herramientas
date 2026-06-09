@@ -165,6 +165,7 @@ public class MarcaService {
                 .nombre(marca.getNombre())
                 .fecha(marca.getFecha())
                 .estado(marca.getEstado())
+                .cantidadProductosRelacionados(productoRepository.countByMarcaIdAndEstadoNot(marca.getId(), ESTADO_BORRADO))
                 .build();
     }
 }
