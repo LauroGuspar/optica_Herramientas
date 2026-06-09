@@ -84,6 +84,13 @@ const Categorias = () => {
             confirmButtonColor: "#3b82f6",
             cancelButtonColor: "#ef4444",
             inputValidator: (value) => (!value ? "Debes seleccionar un destino" : undefined),
+            buttonsStyling: false,
+            customClass: {
+                popup: "swal-pro-card",
+                actions: "swal-pro-actions",
+                confirmButton: "swal-pro-confirm",
+                cancelButton: "swal-pro-cancel",
+            },
         });
 
         return seleccion.isConfirmed ? seleccion.value : null;
@@ -105,6 +112,13 @@ const Categorias = () => {
             cancelButtonText: "Cancelar",
             confirmButtonColor: "#3b82f6",
             cancelButtonColor: "#ef4444",
+            buttonsStyling: false,
+            customClass: {
+                popup: "swal-pro-card",
+                actions: "swal-pro-actions",
+                confirmButton: "swal-pro-confirm swal-pro-confirm--danger",
+                cancelButton: "swal-pro-cancel",
+            },
         });
 
         if (!opcion.isConfirmed) return;
