@@ -219,7 +219,7 @@ const Clientes = () => {
               setBusqueda(e.target.value);
               setPaginaActual(1);
             }}
-            placeholder="Nombre, DNI o correo..."
+            placeholder="Nombre, DNI, RUC o correo..."
           />
         </div>
       </div>

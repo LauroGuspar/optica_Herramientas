@@ -15,7 +15,7 @@ const ModalVerCliente = ({ cliente, cerrarModal }) => {
         <b>Nombre:</b> {cliente.nombreCompleto}
       </p>
       <p>
-        <b>DNI:</b> {cliente.numeroDocumento}
+        <b>Documento:</b> {cliente.tipoDocumentoNombre} {cliente.numeroDocumento}
       </p>
       <p>
         <b>Correo:</b> {cliente.correo}
