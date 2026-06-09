@@ -48,6 +48,7 @@ public class OpcionDataLoader implements ApplicationRunner {
             opcion.setRuta(definicion.ruta());
             opcion.setIcono(definicion.icono());
             opcion.setOrden(definicion.orden());
+            opcion.setVisibleEnMenu(definicion.visibleEnMenu());
             opcion.setPadre(padre);
             opcionesPorNombre.put(definicion.nombre(), opcionRepository.save(opcion));
         }
