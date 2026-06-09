@@ -89,7 +89,7 @@ public class CategoriaService {
         }
 
         if (categoria.getEstado() == ESTADO_ACTIVO) {
-            long conteo = productoRepository.countByCategoriaIdAndEstadoNot(id, ESTADO_BORRADO);
+            long conteo = productoRepository.countRelacionadosPorCategoria(id, ESTADO_BORRADO);
             if (conteo > 0) {
                 // Si tiene productos, pasamos a estado 2 (En desuso)
                 categoria.setEstado(ESTADO_INACTIVO);
@@ -144,7 +144,7 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
-        long conteo = productoRepository.countByCategoriaIdAndEstadoNot(id, ESTADO_BORRADO);
+        long conteo = productoRepository.countRelacionadosPorCategoria(id, ESTADO_BORRADO);
         if (conteo > 0) {
             throw new IllegalStateException("No se puede eliminar una categoría con productos activos.");
         }
@@ -157,7 +157,7 @@ public class CategoriaService {
                 .id(categoria.getId())
                 .nombre(categoria.getNombre())
                 .estado(categoria.getEstado())
-                .cantidadProductosRelacionados(productoRepository.countByCategoriaIdAndEstadoNot(categoria.getId(), ESTADO_BORRADO))
+                .cantidadProductosRelacionados(productoRepository.countRelacionadosPorCategoria(categoria.getId(), ESTADO_BORRADO))
                 .build();
     }
 }

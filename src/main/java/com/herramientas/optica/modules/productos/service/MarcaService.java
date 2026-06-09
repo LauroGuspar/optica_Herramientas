@@ -93,7 +93,7 @@ public class MarcaService {
         }
 
         if (marca.getEstado() == ESTADO_ACTIVO) {
-            long conteo = productoRepository.countByMarcaIdAndEstadoNot(id, ESTADO_BORRADO);
+            long conteo = productoRepository.countRelacionadosPorMarca(id, ESTADO_BORRADO);
             if (conteo > 0) {
                 // Si tiene productos, pasamos a estado 2 (En desuso)
                 marca.setEstado(ESTADO_INACTIVO);
@@ -149,7 +149,7 @@ public class MarcaService {
         Marca marca = marcaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
 
-        long conteo = productoRepository.countByMarcaIdAndEstadoNot(id, ESTADO_BORRADO);
+        long conteo = productoRepository.countRelacionadosPorMarca(id, ESTADO_BORRADO);
         if (conteo > 0) {
             throw new IllegalStateException("No se puede eliminar la marca '" + marca.getNombre() +
                     "' porque está siendo usada por " + conteo + " productos.");
@@ -165,7 +165,7 @@ public class MarcaService {
                 .nombre(marca.getNombre())
                 .fecha(marca.getFecha())
                 .estado(marca.getEstado())
-                .cantidadProductosRelacionados(productoRepository.countByMarcaIdAndEstadoNot(marca.getId(), ESTADO_BORRADO))
+                .cantidadProductosRelacionados(productoRepository.countRelacionadosPorMarca(marca.getId(), ESTADO_BORRADO))
                 .build();
     }
 }

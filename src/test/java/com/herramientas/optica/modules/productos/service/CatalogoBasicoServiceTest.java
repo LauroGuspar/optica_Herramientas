@@ -208,6 +208,8 @@ class CatalogoBasicoServiceTest {
         productoCompra.setUnidadCompra(unidad);
         productoRepository.save(productoCompra);
 
+        productoRepository.save(producto("PRODUCTO UND MISMA COMPRA VENTA", categoria, marca, unidad));
+
         Producto borradoConUnidadVenta = producto("PRODUCTO UND BORRADO", categoria, marca, unidad);
         borradoConUnidadVenta.setUnidadCompra(otraUnidad);
         borradoConUnidadVenta.setEstado(0);
@@ -218,7 +220,7 @@ class CatalogoBasicoServiceTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(response.getCantidadProductosRelacionados()).isEqualTo(2);
+        assertThat(response.getCantidadProductosRelacionados()).isEqualTo(3);
     }
 
     private MarcaRequestDTO marcaRequest(String nombre) {

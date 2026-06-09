@@ -89,7 +89,7 @@ public class UnidadService {
         }
 
         if (unidad.getEstado() == ESTADO_ACTIVO) {
-            long conteo = productoRepository.countByUnidadIdAndEstadoNot(id, ESTADO_BORRADO);
+            long conteo = productoRepository.countRelacionadosPorUnidad(id, ESTADO_BORRADO);
             if (conteo > 0) {
                 // Si tiene productos, pasamos a estado 2 (En desuso)
                 unidad.setEstado(ESTADO_INACTIVO);
@@ -108,7 +108,7 @@ public class UnidadService {
         Unidad unidad = unidadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Unidad no encontrada."));
 
-        long conteo = productoRepository.countByUnidadIdAndEstadoNot(id, ESTADO_BORRADO);
+        long conteo = productoRepository.countRelacionadosPorUnidad(id, ESTADO_BORRADO);
         if (conteo > 0) {
             throw new IllegalStateException("No se puede eliminar la unidad '" + unidad.getNombre() +
                     "' porque hay productos que dependen de ella.");
@@ -123,7 +123,7 @@ public class UnidadService {
                 .id(unidad.getId())
                 .nombre(unidad.getNombre())
                 .estado(unidad.getEstado())
-                .cantidadProductosRelacionados(productoRepository.countByUnidadIdAndEstadoNot(unidad.getId(), ESTADO_BORRADO))
+                .cantidadProductosRelacionados(productoRepository.countRelacionadosPorUnidad(unidad.getId(), ESTADO_BORRADO))
                 .build();
     }
 }

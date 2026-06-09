@@ -18,17 +18,31 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     boolean existsByCodigo(String codigo);
 
-    long countByCategoriaIdAndEstadoNot(Long categoriaId, Integer estado);
+    @Query(value = """
+            SELECT COUNT(DISTINCT p.id_producto)
+            FROM producto p
+            WHERE p.id_categoria = :categoriaId
+              AND p.produc_estado <> :estadoBorrado
+            """, nativeQuery = true)
+    long countRelacionadosPorCategoria(@Param("categoriaId") Long categoriaId,
+            @Param("estadoBorrado") Integer estadoBorrado);
 
-    long countByMarcaIdAndEstadoNot(Long marcaId, Integer estado);
+    @Query(value = """
+            SELECT COUNT(DISTINCT p.id_producto)
+            FROM producto p
+            WHERE p.id_marca = :marcaId
+              AND p.produc_estado <> :estadoBorrado
+            """, nativeQuery = true)
+    long countRelacionadosPorMarca(@Param("marcaId") Long marcaId,
+            @Param("estadoBorrado") Integer estadoBorrado);
 
-    @Query("""
-            SELECT COUNT(p)
-            FROM Producto p
-            WHERE (p.unidadVenta.id = :unidadId OR p.unidadCompra.id = :unidadId)
-              AND p.estado <> :estadoBorrado
-            """)
-    long countByUnidadIdAndEstadoNot(@Param("unidadId") Integer unidadId,
+    @Query(value = """
+            SELECT COUNT(DISTINCT p.id_producto)
+            FROM producto p
+            WHERE (p.id_unidad_venta = :unidadId OR p.id_unidad_compra = :unidadId)
+              AND p.produc_estado <> :estadoBorrado
+            """, nativeQuery = true)
+    long countRelacionadosPorUnidad(@Param("unidadId") Integer unidadId,
             @Param("estadoBorrado") Integer estadoBorrado);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
