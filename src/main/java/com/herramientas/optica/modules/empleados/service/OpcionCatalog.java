@@ -28,6 +28,8 @@ public final class OpcionCatalog {
             new OpcionDefinition("Gestión Clientes", "/clientes", "IconClientes", 1, "Clientes y Ventas", true, true),
             new OpcionDefinition("Cajas Operativas", "/cajas", "IconDashboard", 2, "Clientes y Ventas", false, true),
             new OpcionDefinition("Ventas Operativas", "/ventas", "IconVentas", 3, "Clientes y Ventas", true, true),
+            new OpcionDefinition("Historial Recetas", "/recetas", "IconClientes", 4, "Clientes y Ventas", true, true),
+            new OpcionDefinition("Órdenes Laboratorio", "/ordenes-laboratorio", "IconVentas", 5, "Clientes y Ventas", true, true),
 
             new OpcionDefinition("Inventario Operativo", "/inventario", "IconInventario", 1, "Inventario", true, true),
             new OpcionDefinition("Productos", "/productos", "IconInventario", 2, "Inventario", true, true),
