@@ -19,7 +19,7 @@ public final class OpcionCatalog {
             new OpcionDefinition("Inventario", null, "IconInventario", 30, null, true, true),
             new OpcionDefinition("Proveedor/Compras", null, "IconCompras", 40, null, true, true),
             new OpcionDefinition("Reportes", null, "IconReportes", 50, null, true, true),
-            new OpcionDefinition("Gestión Web", null, "IconGestionWeb", 60, null, true, false),
+            new OpcionDefinition("Gestión Web", null, "IconGestionWeb", 60, null, true, true),
 
             new OpcionDefinition("Listar Empleados", "/empleados", "IconEmpleados", 1, "Administración", true, true),
             new OpcionDefinition("Perfiles", "/perfiles", "IconPerfiles", 2, "Administración", true, true),
@@ -46,8 +46,8 @@ public final class OpcionCatalog {
             new OpcionDefinition("Compras por Proveedor", "/reportes/compras", "IconCompras", 4, "Reportes", true, true),
                 //new OpcionDefinition("Productos Bajo Stock", "/reportes/bajo-stock", "IconInventario", 5, "Reportes", false),
 
-            new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 1, "Gestión Web", true, false),
-            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", true, false));
+            new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 1, "Gestión Web", true, true),
+            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", true, true));
     }
 
     public record OpcionDefinition(String nombre, String ruta, String icono, Integer orden, String padreNombre,
