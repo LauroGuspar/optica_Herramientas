@@ -12,6 +12,8 @@ import com.herramientas.optica.modules.laboratorio.dto.ActualizarEstadoOrdenDTO;
 import com.herramientas.optica.modules.laboratorio.dto.OrdenLaboratorioResponseDTO;
 import com.herramientas.optica.modules.ventas.model.Venta;
 import com.herramientas.optica.modules.receta.model.RecetaClinica;
+import com.herramientas.optica.modules.clientes.model.Cliente;
+import com.herramientas.optica.modules.empleados.model.Empleado;
 
 @Service
 public class OrdenLaboratorioService {
@@ -84,15 +86,31 @@ public class OrdenLaboratorioService {
         return OrdenLaboratorioResponseDTO.builder()
                 .id(orden.getId())
                 .ventaId(orden.getVenta().getId())
-                .clienteNombre(orden.getVenta().getCliente().getNombre() + " " + orden.getVenta().getCliente().getApellido())
+                .clienteNombre(formatNombreCliente(orden.getVenta().getCliente()))
                 .recetaId(orden.getRecetaClinica().getId())
-                .optometristaNombre(orden.getRecetaClinica().getEmpleado().getNombre() + " " + orden.getRecetaClinica().getEmpleado().getApellido())
+                .optometristaNombre(formatNombreEmpleado(orden.getRecetaClinica().getEmpleado()))
                 .estadoOrden(orden.getEstadoOrden())
                 .fechaPromesaEntrega(orden.getFechaPromesaEntrega())
                 .laboratorioNombre(orden.getLaboratorioNombre())
-                .notesFieldNameMaybe(orden.getNotas()) // Wait, in entity we defined "notas", so:
                 .notas(orden.getNotas())
                 .createdAt(orden.getCreatedAt())
                 .build();
+    }
+
+    private String formatNombreCliente(Cliente cliente) {
+        if (cliente.getNombreEmpresa() != null && !cliente.getNombreEmpresa().isBlank()) {
+            return cliente.getNombreEmpresa().trim();
+        }
+        return String.join(" ",
+                cliente.getNombre() != null ? cliente.getNombre() : "",
+                cliente.getApellidoPaterno() != null ? cliente.getApellidoPaterno() : "",
+                cliente.getApellidoMaterno() != null ? cliente.getApellidoMaterno() : "").trim();
+    }
+
+    private String formatNombreEmpleado(Empleado empleado) {
+        return String.join(" ",
+                empleado.getNombre() != null ? empleado.getNombre() : "",
+                empleado.getApellidoPaterno() != null ? empleado.getApellidoPaterno() : "",
+                empleado.getApellidoMaterno() != null ? empleado.getApellidoMaterno() : "").trim();
     }
 }

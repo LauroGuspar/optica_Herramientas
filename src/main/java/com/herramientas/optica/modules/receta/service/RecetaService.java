@@ -76,9 +76,9 @@ public class RecetaService {
         return RecetaResponseDTO.builder()
                 .id(receta.getId())
                 .clienteId(receta.getCliente().getId())
-                .clienteNombre(receta.getCliente().getNombre() + " " + receta.getCliente().getApellido())
+                .clienteNombre(formatNombreCliente(receta.getCliente()))
                 .empleadoId(receta.getEmpleado().getId())
-                .empleadoNombre(receta.getEmpleado().getNombre() + " " + receta.getEmpleado().getApellido())
+                .empleadoNombre(formatNombreEmpleado(receta.getEmpleado()))
                 .fechaEvaluacion(receta.getFechaEvaluacion())
                 .odEsfera(receta.getOdEsfera())
                 .odCilindro(receta.getOdCilindro())
@@ -97,5 +97,22 @@ public class RecetaService {
                 .tratamientos(receta.getTratamientos())
                 .observaciones(receta.getObservaciones())
                 .build();
+    }
+
+    private String formatNombreCliente(Cliente cliente) {
+        if (cliente.getNombreEmpresa() != null && !cliente.getNombreEmpresa().isBlank()) {
+            return cliente.getNombreEmpresa().trim();
+        }
+        return String.join(" ",
+                cliente.getNombre() != null ? cliente.getNombre() : "",
+                cliente.getApellidoPaterno() != null ? cliente.getApellidoPaterno() : "",
+                cliente.getApellidoMaterno() != null ? cliente.getApellidoMaterno() : "").trim();
+    }
+
+    private String formatNombreEmpleado(Empleado empleado) {
+        return String.join(" ",
+                empleado.getNombre() != null ? empleado.getNombre() : "",
+                empleado.getApellidoPaterno() != null ? empleado.getApellidoPaterno() : "",
+                empleado.getApellidoMaterno() != null ? empleado.getApellidoMaterno() : "").trim();
     }
 }
