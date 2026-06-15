@@ -274,8 +274,20 @@ const TablaProductos = ({ productos, cargando, recargarTabla, onEditarProducto, 
                   <td style={{ padding: "12px 8px" }}>
                     <div style={{ fontWeight: 600, color: "#1e293b" }}>{p.nombre}</div>
                     <div style={{ fontSize: "11px", color: "#94a3b8" }}>{p.modelo || "Sin modelo"}</div>
+                    <div style={{ display: "flex", gap: "4px", marginTop: "4px", flexWrap: "wrap" }}>
+                      {p.visibleWeb && (
+                        <span style={{ fontSize: "10px", background: "#dcfce7", color: "#166534", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                          Web
+                        </span>
+                      )}
+                      {p.destacado && (
+                        <span style={{ fontSize: "10px", background: "#fef9c3", color: "#854d0e", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                          ★ Destacado
+                        </span>
+                      )}
+                    </div>
                     {revisarCatalogo && (
-                      <span className="catalog-review-badge">⚠ Revisar catálogo</span>
+                      <span className="catalog-review-badge" style={{ marginTop: "4px", display: "inline-block" }}>⚠ Revisar catálogo</span>
                     )}
                   </td>
                   <td style={{ padding: "12px 8px" }}>

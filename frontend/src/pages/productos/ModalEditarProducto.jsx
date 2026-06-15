@@ -31,6 +31,13 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
+  const [visibleWeb, setVisibleWeb] = useState(producto?.visibleWeb || false);
+  const [destacado, setDestacado] = useState(producto?.destacado || false);
+  const [slug, setSlug] = useState(producto?.slug || "");
+  const [descripcionWeb, setDescripcionWeb] = useState(producto?.descripcionWeb || "");
+  const [etiquetas, setEtiquetas] = useState(producto?.etiquetas || "");
+  const [orden, setOrden] = useState(producto?.orden ?? "0");
+
   const hoyStr = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
@@ -128,6 +135,12 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
       idUnidadVenta: parseInt(idUnidadVenta),
       idUnidadCompra: parseInt(idUnidadCompra),
       factorConversion: parseInt(factorConversion) || 1,
+      visibleWeb,
+      destacado,
+      slug: slug.trim() || null,
+      descripcionWeb: descripcionWeb.trim() || null,
+      etiquetas: etiquetas.trim() || null,
+      orden: parseInt(orden) || 0,
     };
 
     formData.append("producto", new Blob([JSON.stringify(productoData)], { type: "application/json" }));
@@ -343,6 +356,37 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
           <span>Cada 1 "{textoUnidadCompra}" ingresada modificará el inventario por {factorConversion} "{textoUnidadVenta}".</span>
         </div>
       )}
+
+      <Divider />
+      <SeccionLabel text="Información para Catálogo Web (B2C)" />
+      <div className="form-grid">
+        <div style={{ display: "flex", gap: "20px", alignItems: "center", height: "100%" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#1e293b" }}>
+            <input type="checkbox" checked={visibleWeb} onChange={(e) => setVisibleWeb(e.target.checked)} style={{ width: "17px", height: "17px" }} />
+            Visible en Web
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#1e293b" }}>
+            <input type="checkbox" checked={destacado} onChange={(e) => setDestacado(e.target.checked)} style={{ width: "17px", height: "17px" }} />
+            Producto Destacado
+          </label>
+        </div>
+        <div>
+          <label className="label-control">Enlace URL (Slug)</label>
+          <input className="input-control" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Autogenerado si está vacío" />
+        </div>
+        <div>
+          <label className="label-control">Orden de Visualización</label>
+          <input type="number" min="0" className="input-control" value={orden} onChange={(e) => setOrden(e.target.value)} />
+        </div>
+      </div>
+      <div style={{ marginTop: "10px" }}>
+        <label className="label-control">Etiquetas Web (Separadas por comas)</label>
+        <input className="input-control" value={etiquetas} onChange={(e) => setEtiquetas(e.target.value)} placeholder="Ej. antireflex, transition, montura, filtro-azul" />
+      </div>
+      <div style={{ marginTop: "10px", marginBottom: "15px" }}>
+        <label className="label-control">Descripción Comercial para Web</label>
+        <textarea className="input-control" value={descripcionWeb} onChange={(e) => setDescripcionWeb(e.target.value)} placeholder="Descripción llamativa para el cliente final..." rows="2" style={{ resize: "vertical", width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+      </div>
 
       <Divider />
       <SeccionLabel text="Multimedia del Producto" />
