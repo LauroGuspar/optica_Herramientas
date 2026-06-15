@@ -38,6 +38,9 @@ import com.herramientas.optica.modules.ventas.model.Venta;
 import com.herramientas.optica.modules.ventas.model.VentaDetalle;
 import com.herramientas.optica.modules.ventas.model.VentaDetalleId;
 import com.herramientas.optica.modules.ventas.repository.VentaRepository;
+import com.herramientas.optica.modules.laboratorio.service.OrdenLaboratorioService;
+import com.herramientas.optica.modules.receta.repository.RecetaClinicaRepository;
+import com.herramientas.optica.modules.receta.model.RecetaClinica;
 
 @Service
 public class VentaService {
@@ -55,6 +58,8 @@ public class VentaService {
     private final TipoComprobanteRepository tipoComprobanteRepository;
     private final InventarioService inventarioService;
     private final CajaService cajaService;
+    private final OrdenLaboratorioService ordenLaboratorioService;
+    private final RecetaClinicaRepository recetaClinicaRepository;
 
     /**
      * Crea el servicio que coordina ventas emitidas con inventario y caja.
@@ -62,7 +67,8 @@ public class VentaService {
     public VentaService(VentaRepository ventaRepository, ClienteRepository clienteRepository,
             EmpleadoRepository empleadoRepository, ProductoRepository productoRepository, CajaRepository cajaRepository,
             TipoComprobanteRepository tipoComprobanteRepository, InventarioService inventarioService,
-            CajaService cajaService) {
+            CajaService cajaService, OrdenLaboratorioService ordenLaboratorioService,
+            RecetaClinicaRepository recetaClinicaRepository) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.empleadoRepository = empleadoRepository;
@@ -71,6 +77,8 @@ public class VentaService {
         this.tipoComprobanteRepository = tipoComprobanteRepository;
         this.inventarioService = inventarioService;
         this.cajaService = cajaService;
+        this.ordenLaboratorioService = ordenLaboratorioService;
+        this.recetaClinicaRepository = recetaClinicaRepository;
     }
 
     /**
@@ -148,6 +156,12 @@ public class VentaService {
 
         cajaService.registrarMovimiento(caja.getId(), movimientoCajaRequest(empleado.getId(), dto.getMedioPago(),
                 ventaGuardada.getTotal(), ventaGuardada.getId()));
+
+        if (dto.getRecetaId() != null) {
+            RecetaClinica receta = recetaClinicaRepository.findById(dto.getRecetaId())
+                    .orElseThrow(() -> new IllegalArgumentException("Receta no encontrada con ID: " + dto.getRecetaId()));
+            ordenLaboratorioService.crearOrden(ventaGuardada, receta, "Creada automáticamente desde venta #" + ventaGuardada.getId());
+        }
 
         return mapearVenta(ventaRepository.save(ventaGuardada));
     }

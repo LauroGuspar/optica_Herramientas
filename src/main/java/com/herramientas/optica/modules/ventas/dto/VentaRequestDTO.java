@@ -28,6 +28,8 @@ public class VentaRequestDTO {
     @Positive(message = "La caja debe ser valida")
     private Long cajaId;
 
+    private Long recetaId;
+
     @Positive(message = "El tipo de comprobante debe ser valido")
     private Integer tipoComprobanteId;
 
