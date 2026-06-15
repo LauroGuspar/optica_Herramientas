@@ -54,6 +54,8 @@ jwt:
 app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
+  catalogo:
+    url: ${CATALOGO_URL:http://localhost:5174}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

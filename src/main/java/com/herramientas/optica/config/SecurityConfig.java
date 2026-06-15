@@ -36,15 +36,18 @@ public class SecurityConfig {
     private final EmpleadoRepository empleadoRepository;
     private final OpcionRepository opcionRepository;
     private final String frontendUrl;
+    private final String catalogoUrl;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService, 
                         EmpleadoRepository empleadoRepository, OpcionRepository opcionRepository,
-                        @Value("${app.frontend.url}") String frontendUrl) {
+                        @Value("${app.frontend.url}") String frontendUrl,
+                        @Value("${app.catalogo.url}") String catalogoUrl) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
         this.empleadoRepository = empleadoRepository;
         this.opcionRepository = opcionRepository;
         this.frontendUrl = frontendUrl;
+        this.catalogoUrl = catalogoUrl;
     }
 
     @Bean
@@ -74,7 +77,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of(frontendUrl));
+        corsConfiguration.setAllowedOrigins(List.of(frontendUrl, catalogoUrl));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         corsConfiguration.setAllowCredentials(true);

@@ -47,7 +47,7 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
-        if (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/public/")) {
+        if (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/public/") || path.startsWith("/api/v1/cliente-portal/")) {
             filterChain.doFilter(request, response);
             return;
         }
