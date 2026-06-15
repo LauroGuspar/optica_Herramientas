@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect, createContext, useContext, useMemo } from "react";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,6 +29,86 @@ import CatalogoWeb from "./pages/CatalogoWeb";
 import Etiquetas from "./pages/Etiquetas";
 import ContenidoWeb from "./pages/ContenidoWeb";
 import CotizacionesAdmin from "./pages/CotizacionesAdmin";
+
+const AppContext = createContext(null);
+export const useApp = () => useContext(AppContext);
+
+const LoginRoute = () => {
+  const { setToken } = useApp();
+  return (
+    <Login
+      onLoginSuccess={() => setToken(localStorage.getItem("token"))}
+    />
+  );
+};
+
+const ProtectedRouteElement = () => {
+  const { opciones, loading, setToken } = useApp();
+  return (
+    <ProtectedRoute opciones={opciones} loading={loading}>
+      <MainLayout opciones={opciones} setToken={setToken} />
+    </ProtectedRoute>
+  );
+};
+
+const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <LoginRoute />,
+  },
+  {
+    path: "/",
+    element: <ProtectedRouteElement />,
+    children: [
+      { index: true, element: <HomeDashboard /> },
+      { path: "clientes", element: <Clientes /> },
+      { path: "empleados", element: <Empleados /> },
+      { path: "perfiles", element: <Perfiles /> },
+      { path: "productos", element: <Productos /> },
+      { path: "configuracion-menu", element: <ConfiguracionMenu /> },
+      { path: "marcas", element: <Marcas /> },
+      { path: "categorias", element: <Categorias /> },
+      { path: "unidades", element: <Unidades /> },
+      { path: "etiquetas", element: <Etiquetas /> },
+      { path: "inventario/etiquetas", element: <Etiquetas /> },
+      { path: "inventario", element: <Inventario /> },
+      { path: "proveedores", element: <Proveedores /> },
+      { path: "ventas", element: <Ventas /> },
+      { path: "recetas", element: <Recetas /> },
+      { path: "ordenes-laboratorio", element: <OrdenesLaboratorio /> },
+      { path: "reportes/caja", element: <ReporteCajas /> },
+      {
+        path: "reportes/caja-diaria",
+        element: <Navigate to="/reportes/caja" replace />,
+      },
+      { path: "reportes/kardex", element: <ReporteKardex /> },
+      { path: "reportes/ventas", element: <ReporteVentas /> },
+      { path: "reportes/compras", element: <ReporteCompras /> },
+      { path: "reportes/cajas", element: <ReporteCajas /> },
+      {
+        path: "configuracion",
+        element: (
+          <EnProceso
+            titulo="Configuración"
+            descripcion="Aquí se gestionará el cambio de contraseña y otros ajustes de cuenta."
+          />
+        ),
+      },
+      { path: "catalogo-web", element: <CatalogoWeb /> },
+      { path: "gestion-web/catalogo-web", element: <CatalogoWeb /> },
+      { path: "cotizaciones", element: <CotizacionesAdmin /> },
+      { path: "gestion-web/cotizaciones", element: <CotizacionesAdmin /> },
+      { path: "contenido-web", element: <ContenidoWeb /> },
+      { path: "gestion-web/contenido", element: <ContenidoWeb /> },
+      { path: "cajas/reporte-diario", element: <ReporteDiarioCaja /> },
+      { path: "compras", element: <Compras /> },
+    ],
+  },
+  {
+    path: "*",
+    element: <Navigate to="/login" />,
+  },
+]);
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -64,74 +144,9 @@ function App() {
   }, [token]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <Login
-              onLoginSuccess={() => setToken(localStorage.getItem("token"))}
-            />
-          }
-        />
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute opciones={opciones} loading={loading}>
-              <MainLayout opciones={opciones} setToken={setToken} />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<HomeDashboard />} />
-          <Route path="clientes" element={<Clientes />} />
-          <Route path="empleados" element={<Empleados />} />
-          <Route path="perfiles" element={<Perfiles />} />
-          <Route path="productos" element={<Productos />} />
-          <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
-          <Route path="marcas" element={<Marcas />} />
-          <Route path="categorias" element={<Categorias />} />
-          <Route path="unidades" element={<Unidades />} />
-          <Route path="etiquetas" element={<Etiquetas />} />
-          <Route path="inventario/etiquetas" element={<Etiquetas />} />
-          <Route path="inventario" element={<Inventario />} />
-          <Route path="proveedores" element={<Proveedores />} />
-          <Route path="ventas" element={<Ventas />} />
-          <Route path="recetas" element={<Recetas />} />
-          <Route path="ordenes-laboratorio" element={<OrdenesLaboratorio />} />
-          <Route path="reportes/caja" element={<ReporteCajas />} />
-          <Route
-            path="reportes/caja-diaria"
-            element={<Navigate to="/reportes/caja" replace />}
-          />
-          <Route path="reportes/kardex" element={<ReporteKardex />} />
-          <Route path="reportes/ventas" element={<ReporteVentas />} />
-          <Route path="reportes/compras" element={<ReporteCompras />} />
-          <Route
-            path="configuracion"
-            element={
-              <EnProceso
-                titulo="Configuración"
-                descripcion="Aquí se gestionará el cambio de contraseña y otros ajustes de cuenta."
-              />
-            }
-          />
-          <Route path="catalogo-web" element={<CatalogoWeb />} />
-          <Route path="gestion-web/catalogo-web" element={<CatalogoWeb />} />
-          <Route path="cotizaciones" element={<CotizacionesAdmin />} />
-          <Route
-            path="gestion-web/cotizaciones"
-            element={<CotizacionesAdmin />}
-          />
-          <Route path="contenido-web" element={<ContenidoWeb />} />
-          <Route path="gestion-web/contenido" element={<ContenidoWeb />} />
-          <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
-          <Route path="compras" element={<Compras />} />
-        </Route>
-
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </BrowserRouter>
+    <AppContext.Provider value={{ opciones, token, loading, setToken }}>
+      <RouterProvider router={router} />
+    </AppContext.Provider>
   );
 }
 
