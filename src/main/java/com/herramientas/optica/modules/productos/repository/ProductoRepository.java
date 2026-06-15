@@ -62,4 +62,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     java.util.Optional<Producto> findBySlugAndVisibleWebTrueAndEstado(String slug, Integer estado);
     boolean existsBySlug(String slug);
     boolean existsBySlugAndIdNot(String slug, Long id);
+
+    @Query("""
+            SELECT SUM(p.stock * COALESCE(p.costo, 0)), SUM(p.stock * COALESCE(p.precio, 0))
+            FROM Producto p
+            WHERE p.estado = 1
+            """)
+    List<Object[]> getValoresInventario();
 }
