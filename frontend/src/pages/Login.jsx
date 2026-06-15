@@ -37,7 +37,9 @@ const Login = ({ onLoginSuccess }) => {
       navigate("/");
     } catch (err) {
       const mensajeError =
-        err.response?.data?.message || err.message || "Credenciales inválidas. Intente de nuevo.";
+        err.response?.data?.message ||
+        err.message ||
+        "Credenciales inválidas. Intente de nuevo.";
       setError(mensajeError);
       Toast.fire({
         icon: "error",
@@ -51,7 +53,10 @@ const Login = ({ onLoginSuccess }) => {
 
   return (
     <main className="login-shell">
-      <section className="login-brand-panel" aria-label="Óptica Divino Niño Del Milagro">
+      <section
+        className="login-brand-panel"
+        aria-label="Óptica Divino Niño Del Milagro"
+      >
         <div className="login-brand-mark">
           <Eye />
         </div>
@@ -59,7 +64,8 @@ const Login = ({ onLoginSuccess }) => {
           <p className="login-eyebrow">Sistema interno</p>
           <h1>Óptica Divino Niño Del Milagro</h1>
           <p>
-            Acceso privado para administrar ventas, inventario, caja y atención al cliente.
+            Acceso privado para administrar ventas, inventario, caja y atención
+            al cliente.
           </p>
         </div>
         <div className="login-brand-strip">
@@ -85,7 +91,9 @@ const Login = ({ onLoginSuccess }) => {
 
           <form onSubmit={handleSubmit} className="login-form">
             <div>
-              <label className="form-label" htmlFor="username">Usuario</label>
+              <label className="form-label" htmlFor="username">
+                Usuario
+              </label>
               <input
                 id="username"
                 type="text"
@@ -99,7 +107,9 @@ const Login = ({ onLoginSuccess }) => {
             </div>
 
             <div>
-              <label className="form-label" htmlFor="password">Contraseña</label>
+              <label className="form-label" htmlFor="password">
+                Contraseña
+              </label>
               <input
                 id="password"
                 type="password"
@@ -112,7 +122,11 @@ const Login = ({ onLoginSuccess }) => {
               />
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary login-submit">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary login-submit"
+            >
               {loading ? "Validando..." : "Ingresar"}
             </button>
           </form>

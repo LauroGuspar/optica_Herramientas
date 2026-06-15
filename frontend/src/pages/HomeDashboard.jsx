@@ -5,7 +5,7 @@ import {
   PeopleFill,
   Box2Fill,
   ExclamationTriangleFill,
-  CheckCircleFill
+  CheckCircleFill,
 } from "react-bootstrap-icons";
 
 const HomeDashboard = () => {
@@ -13,7 +13,7 @@ const HomeDashboard = () => {
     totalUsuarios: 0,
     totalClientes: 0,
     totalProductos: 0,
-    productosBajoStock: []
+    productosBajoStock: [],
   });
   const [cargando, setCargando] = useState(true);
 
@@ -23,13 +23,13 @@ const HomeDashboard = () => {
         // Hacemos ambas peticiones en paralelo para ahorrar tiempo
         const [resStats, resProductos] = await Promise.all([
           api.get("/api/v1/dashboard/stats").catch(() => ({ data: {} })),
-          api.get("/api/v1/productos").catch(() => ({ data: [] })) // Cambia esta ruta si tu endpoint de productos es diferente
+          api.get("/api/v1/productos").catch(() => ({ data: [] })), // Cambia esta ruta si tu endpoint de productos es diferente
         ]);
 
         const listaProductos = resProductos.data || [];
-        
+
         // React hace el trabajo del backend: Filtra los productos con stock crítico en vivo
-        const alertasCriticas = listaProductos.filter(prod => {
+        const alertasCriticas = listaProductos.filter((prod) => {
           const cantidadActual = parseInt(prod.stock ?? 0);
           const cantidadMinima = parseInt(prod.stockMinimo ?? 1);
           return cantidadActual <= cantidadMinima;
@@ -39,7 +39,7 @@ const HomeDashboard = () => {
           totalUsuarios: resStats.data.totalUsuarios || 0,
           totalClientes: resStats.data.totalClientes || 0,
           totalProductos: listaProductos.length, // Usamos el tamaño real de tu catálogo
-          productosBajoStock: alertasCriticas   // Guardamos las alertas filtradas en el navegador
+          productosBajoStock: alertasCriticas, // Guardamos las alertas filtradas en el navegador
         });
       } catch (error) {
         console.error("Error cargando estadísticas unificadas:", error);
@@ -125,7 +125,7 @@ const HomeDashboard = () => {
       borderRadius: "16px",
       padding: "25px",
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-      border: "1px solid #e2e8f0"
+      border: "1px solid #e2e8f0",
     },
     alertHeader: {
       fontSize: "18px",
@@ -134,7 +134,7 @@ const HomeDashboard = () => {
       marginBottom: "20px",
       display: "flex",
       alignItems: "center",
-      gap: "10px"
+      gap: "10px",
     },
     alertList: {
       display: "flex",
@@ -142,7 +142,7 @@ const HomeDashboard = () => {
       gap: "12px",
       maxHeight: "350px",
       overflowY: "auto",
-      paddingRight: "5px"
+      paddingRight: "5px",
     },
     alertItem: {
       display: "flex",
@@ -152,20 +152,20 @@ const HomeDashboard = () => {
       backgroundColor: "#fff5f5",
       border: "1px solid #fed7d7",
       borderRadius: "12px",
-      fontSize: "14px"
+      fontSize: "14px",
     },
     productInfo: {
       display: "flex",
       flexDirection: "column",
-      gap: "2px"
+      gap: "2px",
     },
     productName: {
       fontWeight: "600",
-      color: "#9b2c2c"
+      color: "#9b2c2c",
     },
     productMeta: {
       fontSize: "12px",
-      color: "#64748b"
+      color: "#64748b",
     },
     badgeStock: {
       backgroundColor: "#fff",
@@ -175,7 +175,7 @@ const HomeDashboard = () => {
       fontWeight: "700",
       color: "#9b2c2c",
       textAlign: "right",
-      fontSize: "13px"
+      fontSize: "13px",
     },
     emptyAlerts: {
       display: "flex",
@@ -188,8 +188,8 @@ const HomeDashboard = () => {
       border: "1px solid #badbcc",
       borderRadius: "12px",
       gap: "10px",
-      fontSize: "15px"
-    }
+      fontSize: "15px",
+    },
   };
 
   return (
@@ -238,13 +238,18 @@ const HomeDashboard = () => {
         </h3>
 
         {cargando ? (
-          <div style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
+          <div
+            style={{ textAlign: "center", padding: "20px", color: "#64748b" }}
+          >
             Sincronizando auditoría de almacén...
           </div>
         ) : stats.productosBajoStock.length === 0 ? (
           <div style={styles.emptyAlerts}>
             <CheckCircleFill size={24} />
-            <span><strong>¡Todo en orden!</strong> Todos los productos cuentan con stock superior al mínimo establecido.</span>
+            <span>
+              <strong>¡Todo en orden!</strong> Todos los productos cuentan con
+              stock superior al mínimo establecido.
+            </span>
           </div>
         ) : (
           <div style={styles.alertList}>
@@ -253,12 +258,20 @@ const HomeDashboard = () => {
                 <div style={styles.productInfo}>
                   <span style={styles.productName}>{prod.nombre}</span>
                   <span style={styles.productMeta}>
-                    Modelo: {prod.modelo || "Sin Modelo"} | Tipo: {prod.tipoProducto}
+                    Modelo: {prod.modelo || "Sin Modelo"} | Tipo:{" "}
+                    {prod.tipoProducto}
                   </span>
                 </div>
                 <div style={styles.badgeStock}>
                   <div>Stock Actual: {prod.stock} uds</div>
-                  <div style={{ fontSize: "11px", fontWeight: "400", color: "#e53e3e", marginTop: "2px" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "400",
+                      color: "#e53e3e",
+                      marginTop: "2px",
+                    }}
+                  >
                     Mínimo requerido: {prod.stockMinimo} uds
                   </div>
                 </div>

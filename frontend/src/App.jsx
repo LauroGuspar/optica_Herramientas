@@ -30,7 +30,6 @@ import Etiquetas from "./pages/Etiquetas";
 import ContenidoWeb from "./pages/ContenidoWeb";
 import CotizacionesAdmin from "./pages/CotizacionesAdmin";
 
-
 function App() {
   const [opciones, setOpciones] = useState([]);
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -76,8 +75,6 @@ function App() {
           }
         />
 
-
-
         <Route
           path="/"
           element={
@@ -103,7 +100,10 @@ function App() {
           <Route path="recetas" element={<Recetas />} />
           <Route path="ordenes-laboratorio" element={<OrdenesLaboratorio />} />
           <Route path="reportes/caja" element={<ReporteCajas />} />
-          <Route path="reportes/caja-diaria" element={<Navigate to="/reportes/caja" replace />} />
+          <Route
+            path="reportes/caja-diaria"
+            element={<Navigate to="/reportes/caja" replace />}
+          />
           <Route path="reportes/kardex" element={<ReporteKardex />} />
           <Route path="reportes/ventas" element={<ReporteVentas />} />
           <Route path="reportes/compras" element={<ReporteCompras />} />
@@ -119,7 +119,10 @@ function App() {
           <Route path="catalogo-web" element={<CatalogoWeb />} />
           <Route path="gestion-web/catalogo-web" element={<CatalogoWeb />} />
           <Route path="cotizaciones" element={<CotizacionesAdmin />} />
-          <Route path="gestion-web/cotizaciones" element={<CotizacionesAdmin />} />
+          <Route
+            path="gestion-web/cotizaciones"
+            element={<CotizacionesAdmin />}
+          />
           <Route path="contenido-web" element={<ContenidoWeb />} />
           <Route path="gestion-web/contenido" element={<ContenidoWeb />} />
           <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />

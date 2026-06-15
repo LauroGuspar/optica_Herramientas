@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "../api/axiosConfig";
 import { Toast } from "../utils/alerts";
-import { 
-  Globe, 
-  TelephoneFill, 
-  EnvelopeFill, 
-  GeoAltFill, 
-  ClockFill, 
-  Facebook, 
-  Instagram, 
-  Tiktok, 
-  CloudUpload, 
-  Trash3Fill, 
-  ArrowUp, 
-  ArrowDown, 
-  SaveFill 
+import {
+  Globe,
+  TelephoneFill,
+  EnvelopeFill,
+  GeoAltFill,
+  ClockFill,
+  Facebook,
+  Instagram,
+  Tiktok,
+  CloudUpload,
+  Trash3Fill,
+  ArrowUp,
+  ArrowDown,
+  SaveFill,
 } from "react-bootstrap-icons";
 
 const ContenidoWeb = () => {
@@ -25,7 +25,7 @@ const ContenidoWeb = () => {
   const [enlaceFacebook, setEnlaceFacebook] = useState("");
   const [enlaceInstagram, setEnlaceInstagram] = useState("");
   const [enlaceTiktok, setEnlaceTiktok] = useState("");
-  
+
   // Logo states
   const [logoUrl, setLogoUrl] = useState("");
   const [logoFile, setLogoFile] = useState(null);
@@ -44,7 +44,7 @@ const ContenidoWeb = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await api.get("/api/v1/contenido-web", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
       setTelefonoContacto(data.telefonoContacto || "");
@@ -56,20 +56,23 @@ const ContenidoWeb = () => {
       setEnlaceTiktok(data.enlaceTiktok || "");
       setLogoUrl(data.logoUrl || "");
       setLogoPreview(data.logoUrl || "");
-      
+
       const listImgs = (data.carouselImagenes || []).map((img, idx) => ({
         id: img.id,
         url: img.url,
         file: null,
         orden: img.orden || idx,
-        preview: img.url
+        preview: img.url,
       }));
       // Sort by order
       listImgs.sort((a, b) => a.orden - b.orden);
       setImagenes(listImgs);
     } catch (error) {
       console.error("Error al cargar configuración web:", error);
-      Toast.fire({ icon: "error", title: "No se pudo cargar la configuración" });
+      Toast.fire({
+        icon: "error",
+        title: "No se pudo cargar la configuración",
+      });
     } finally {
       setCargando(false);
     }
@@ -95,7 +98,7 @@ const ContenidoWeb = () => {
         url: "",
         file: file,
         orden: imagenes.length + idx,
-        preview: URL.createObjectURL(file)
+        preview: URL.createObjectURL(file),
       }));
       setImagenes([...imagenes, ...nuevas]);
     }
@@ -116,7 +119,7 @@ const ContenidoWeb = () => {
     const temp = nuevas[index - 1];
     nuevas[index - 1] = nuevas[index];
     nuevas[index] = temp;
-    
+
     // Actualizar orden
     nuevas.forEach((img, idx) => {
       img.orden = idx;
@@ -130,7 +133,7 @@ const ContenidoWeb = () => {
     const temp = nuevas[index + 1];
     nuevas[index + 1] = nuevas[index];
     nuevas[index] = temp;
-    
+
     // Actualizar orden
     nuevas.forEach((img, idx) => {
       img.orden = idx;
@@ -156,7 +159,7 @@ const ContenidoWeb = () => {
             id: img.id,
             url: img.url,
             orden: img.orden,
-            fileIndex: null
+            fileIndex: null,
           };
         } else {
           filesToUpload.push(img.file);
@@ -166,7 +169,7 @@ const ContenidoWeb = () => {
             id: null,
             url: "",
             orden: img.orden,
-            fileIndex: index
+            fileIndex: index,
           };
         }
       });
@@ -180,11 +183,11 @@ const ContenidoWeb = () => {
         enlaceFacebook,
         enlaceInstagram,
         enlaceTiktok,
-        carouselImagenes: carouselDTO
+        carouselImagenes: carouselDTO,
       };
 
       formData.append("config", JSON.stringify(configDTO));
-      
+
       if (logoFile) {
         formData.append("logo", logoFile);
       }
@@ -194,10 +197,10 @@ const ContenidoWeb = () => {
       });
 
       await api.put("/api/v1/contenido-web", formData, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       Toast.fire({ icon: "success", title: "Configuración web guardada" });
@@ -205,39 +208,167 @@ const ContenidoWeb = () => {
       setLogoFile(null);
     } catch (error) {
       console.error("Error al guardar configuración web:", error);
-      Toast.fire({ icon: "error", title: "No se pudo guardar la configuración" });
+      Toast.fire({
+        icon: "error",
+        title: "No se pudo guardar la configuración",
+      });
     } finally {
       setGuardando(false);
     }
   };
 
   const styles = {
-    container: { padding: "30px", backgroundColor: "#f8fafc", minHeight: "100vh", fontFamily: "'Segoe UI', sans-serif" },
-    header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px", borderBottom: "2px solid #e2e8f0", paddingBottom: "15px" },
-    title: { fontSize: "26px", color: "#1e293b", margin: 0, fontWeight: "600", display: "flex", alignItems: "center", gap: "10px" },
+    container: {
+      padding: "30px",
+      backgroundColor: "#f8fafc",
+      minHeight: "100vh",
+      fontFamily: "'Segoe UI', sans-serif",
+    },
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "25px",
+      borderBottom: "2px solid #e2e8f0",
+      paddingBottom: "15px",
+    },
+    title: {
+      fontSize: "26px",
+      color: "#1e293b",
+      margin: 0,
+      fontWeight: "600",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
     form: { display: "flex", flexDirection: "column", gap: "24px" },
-    row: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" },
-    card: { backgroundColor: "#ffffff", borderRadius: "14px", padding: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)", border: "1px solid #e2e8f0" },
-    cardTitle: { fontSize: "16px", color: "#334155", fontWeight: "600", marginBottom: "20px", borderBottom: "1px solid #f1f5f9", paddingBottom: "10px" },
-    label: { display: "block", fontSize: "13px", color: "#475569", fontWeight: "600", marginBottom: "6px" },
-    inputGroup: { display: "flex", alignItems: "center", border: "1px solid #cbd5e1", borderRadius: "10px", padding: "10px 14px", backgroundColor: "#fff", marginBottom: "15px" },
+    row: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+      gap: "20px",
+    },
+    card: {
+      backgroundColor: "#ffffff",
+      borderRadius: "14px",
+      padding: "24px",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+      border: "1px solid #e2e8f0",
+    },
+    cardTitle: {
+      fontSize: "16px",
+      color: "#334155",
+      fontWeight: "600",
+      marginBottom: "20px",
+      borderBottom: "1px solid #f1f5f9",
+      paddingBottom: "10px",
+    },
+    label: {
+      display: "block",
+      fontSize: "13px",
+      color: "#475569",
+      fontWeight: "600",
+      marginBottom: "6px",
+    },
+    inputGroup: {
+      display: "flex",
+      alignItems: "center",
+      border: "1px solid #cbd5e1",
+      borderRadius: "10px",
+      padding: "10px 14px",
+      backgroundColor: "#fff",
+      marginBottom: "15px",
+    },
     inputIcon: { color: "#94a3b8", marginRight: "10px" },
-    input: { border: "none", outline: "none", width: "100%", fontSize: "14px", color: "#334155" },
+    input: {
+      border: "none",
+      outline: "none",
+      width: "100%",
+      fontSize: "14px",
+      color: "#334155",
+    },
     logoContainer: { display: "flex", alignItems: "center", gap: "20px" },
-    logoPreview: { width: "100px", height: "100px", borderRadius: "10px", objectFit: "contain", border: "1px dashed #cbd5e1", backgroundColor: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" },
-    uploadBtn: { display: "flex", alignItems: "center", gap: "8px", border: "1px dashed #2563eb", padding: "10px 16px", borderRadius: "8px", color: "#2563eb", cursor: "pointer", fontWeight: "600", fontSize: "13px", backgroundColor: "#f0f9ff" },
-    carouselGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "15px", marginTop: "15px" },
-    carouselItem: { position: "relative", borderRadius: "10px", overflow: "hidden", border: "1px solid #e2e8f0", height: "140px" },
+    logoPreview: {
+      width: "100px",
+      height: "100px",
+      borderRadius: "10px",
+      objectFit: "contain",
+      border: "1px dashed #cbd5e1",
+      backgroundColor: "#f8fafc",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    uploadBtn: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      border: "1px dashed #2563eb",
+      padding: "10px 16px",
+      borderRadius: "8px",
+      color: "#2563eb",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "13px",
+      backgroundColor: "#f0f9ff",
+    },
+    carouselGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+      gap: "15px",
+      marginTop: "15px",
+    },
+    carouselItem: {
+      position: "relative",
+      borderRadius: "10px",
+      overflow: "hidden",
+      border: "1px solid #e2e8f0",
+      height: "140px",
+    },
     carouselImg: { width: "100%", height: "100%", objectFit: "cover" },
-    carouselActions: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(15,23,42,0.75)", display: "flex", justifyContent: "space-around", padding: "6px", alignItems: "center" },
-    actionBtn: { border: "none", background: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "4px" },
-    btnGuardar: { backgroundColor: "#2563eb", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "10px", fontWeight: "600", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", alignSelf: "flex-end", fontSize: "14px", boxShadow: "0 4px 6px -1px rgba(37,99,235,0.2)" }
+    carouselActions: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: "rgba(15,23,42,0.75)",
+      display: "flex",
+      justifyContent: "space-around",
+      padding: "6px",
+      alignItems: "center",
+    },
+    actionBtn: {
+      border: "none",
+      background: "none",
+      color: "#fff",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "4px",
+    },
+    btnGuardar: {
+      backgroundColor: "#2563eb",
+      color: "#fff",
+      border: "none",
+      padding: "12px 24px",
+      borderRadius: "10px",
+      fontWeight: "600",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      cursor: "pointer",
+      alignSelf: "flex-end",
+      fontSize: "14px",
+      boxShadow: "0 4px 6px -1px rgba(37,99,235,0.2)",
+    },
   };
 
   if (cargando) {
     return (
       <div style={styles.container}>
-        <div style={{ textAlign: "center", padding: "60px", color: "#64748b" }}>Cargando datos de configuración web...</div>
+        <div style={{ textAlign: "center", padding: "60px", color: "#64748b" }}>
+          Cargando datos de configuración web...
+        </div>
       </div>
     );
   }
@@ -255,7 +386,7 @@ const ContenidoWeb = () => {
           {/* Card 1: Información de Contacto */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Datos de Contacto de la Tienda</h3>
-            
+
             <label style={styles.label}>WhatsApp / Teléfono de Pedidos</label>
             <div style={styles.inputGroup}>
               <TelephoneFill style={styles.inputIcon} />
@@ -309,14 +440,24 @@ const ContenidoWeb = () => {
           {/* Card 2: Logo y Redes Sociales */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Logo y Redes Sociales</h3>
-            
+
             <label style={styles.label}>Logo Oficial</label>
             <div style={styles.logoContainer}>
               <div style={styles.logoPreview}>
                 {logoPreview ? (
-                  <img src={logoPreview} alt="Logo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                  <img
+                    src={logoPreview}
+                    alt="Logo"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
                 ) : (
-                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>Sin Logo</span>
+                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+                    Sin Logo
+                  </span>
                 )}
               </div>
               <input
@@ -377,8 +518,24 @@ const ContenidoWeb = () => {
 
         {/* Card 3: Imágenes del Carrusel B2C */}
         <div style={styles.card}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f1f5f9", paddingBottom: "10px", marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "16px", color: "#334155", fontWeight: "600", margin: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: "1px solid #f1f5f9",
+              paddingBottom: "10px",
+              marginBottom: "15px",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "16px",
+                color: "#334155",
+                fontWeight: "600",
+                margin: 0,
+              }}
+            >
               Imágenes del Carrusel Principal (Home B2C)
             </h3>
             <input
@@ -398,18 +555,33 @@ const ContenidoWeb = () => {
             </button>
           </div>
           <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-            Añade imágenes destacadas que se proyectarán en la cabecera del catálogo público. Puedes reordenarlas con las flechas.
+            Añade imágenes destacadas que se proyectarán en la cabecera del
+            catálogo público. Puedes reordenarlas con las flechas.
           </p>
 
           {imagenes.length === 0 ? (
-            <div style={{ padding: "40px 10px", textAlign: "center", border: "2px dashed #cbd5e1", borderRadius: "10px", marginTop: "20px", color: "#94a3b8" }}>
-              No hay imágenes en el carrusel. ¡Agrega tu primer banner comercial!
+            <div
+              style={{
+                padding: "40px 10px",
+                textAlign: "center",
+                border: "2px dashed #cbd5e1",
+                borderRadius: "10px",
+                marginTop: "20px",
+                color: "#94a3b8",
+              }}
+            >
+              No hay imágenes en el carrusel. ¡Agrega tu primer banner
+              comercial!
             </div>
           ) : (
             <div style={styles.carouselGrid}>
               {imagenes.map((img, idx) => (
                 <div style={styles.carouselItem} key={img.id || `new-${idx}`}>
-                  <img src={img.preview} alt={`Banner ${idx}`} style={styles.carouselImg} />
+                  <img
+                    src={img.preview}
+                    alt={`Banner ${idx}`}
+                    style={styles.carouselImg}
+                  />
                   <div style={styles.carouselActions}>
                     <button
                       type="button"
@@ -418,7 +590,10 @@ const ContenidoWeb = () => {
                       disabled={idx === 0}
                       title="Mover hacia arriba"
                     >
-                      <ArrowUp size={14} style={{ opacity: idx === 0 ? 0.3 : 1 }} />
+                      <ArrowUp
+                        size={14}
+                        style={{ opacity: idx === 0 ? 0.3 : 1 }}
+                      />
                     </button>
                     <button
                       type="button"
@@ -427,7 +602,12 @@ const ContenidoWeb = () => {
                       disabled={idx === imagenes.length - 1}
                       title="Mover hacia abajo"
                     >
-                      <ArrowDown size={14} style={{ opacity: idx === imagenes.length - 1 ? 0.3 : 1 }} />
+                      <ArrowDown
+                        size={14}
+                        style={{
+                          opacity: idx === imagenes.length - 1 ? 0.3 : 1,
+                        }}
+                      />
                     </button>
                     <button
                       type="button"

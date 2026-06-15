@@ -79,7 +79,10 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
       );
 
       if (!res.data?.success || !res.data?.datos) {
-        Toast.fire({ icon: "error", title: `${configTipo.label} no encontrado` });
+        Toast.fire({
+          icon: "error",
+          title: `${configTipo.label} no encontrado`,
+        });
         return;
       }
 
@@ -99,7 +102,10 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         setDireccion(datos.domiciliado?.direccion || "");
       }
     } catch {
-      Toast.fire({ icon: "error", title: `Error al consultar ${configTipo.label}` });
+      Toast.fire({
+        icon: "error",
+        title: `Error al consultar ${configTipo.label}`,
+      });
     } finally {
       setLoadingDocumento(false);
     }
@@ -111,7 +117,8 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
     if (!numeroDocumento || numeroDocumento.length !== configTipo.longitud) {
       err.numeroDocumento = `${configTipo.label} inválido`;
     }
-    if (!datosConsultados) err.general = `Debe consultar el ${configTipo.label}`;
+    if (!datosConsultados)
+      err.general = `Debe consultar el ${configTipo.label}`;
     if (correo && !correo.includes("@")) {
       err.correo = "Correo inválido";
     }
@@ -163,7 +170,10 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
               {},
               { headers },
             );
-            Toast.fire({ icon: "success", title: "Cliente reactivado correctamente" });
+            Toast.fire({
+              icon: "success",
+              title: "Cliente reactivado correctamente",
+            });
             recargarTabla();
             cerrarModal();
           } catch (err2) {
@@ -244,7 +254,9 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
               value={numeroDocumento}
               onChange={(e) => {
                 setNumeroDocumento(
-                  e.target.value.replace(/\D/g, "").slice(0, configTipo.longitud),
+                  e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, configTipo.longitud),
                 );
                 setDatosConsultados(null);
               }}
