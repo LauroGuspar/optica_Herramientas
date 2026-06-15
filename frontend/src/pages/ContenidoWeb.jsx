@@ -39,6 +39,7 @@ const ContenidoWeb = () => {
 
   const logoInputRef = useRef();
   const carruselInputRef = useRef();
+  const originalConfigRef = useRef(null);
 
   const cargarConfiguracion = async () => {
     try {
@@ -67,6 +68,16 @@ const ContenidoWeb = () => {
       // Sort by order
       listImgs.sort((a, b) => a.orden - b.orden);
       setImagenes(listImgs);
+      originalConfigRef.current = {
+        telefonoContacto: data.telefonoContacto || "",
+        correoContacto: data.correoContacto || "",
+        direccion: data.direccion || "",
+        horarioAtencion: data.horarioAtencion || "",
+        enlaceFacebook: data.enlaceFacebook || "",
+        enlaceInstagram: data.enlaceInstagram || "",
+        enlaceTiktok: data.enlaceTiktok || "",
+        imagenes: listImgs.map((img) => ({ ...img })),
+      };
     } catch (error) {
       console.error("Error al cargar configuración web:", error);
       Toast.fire({
@@ -81,6 +92,39 @@ const ContenidoWeb = () => {
   useEffect(() => {
     cargarConfiguracion();
   }, []);
+
+  const sonImagenesIguales = (origImgs, curImgs) => {
+    if (origImgs.length !== curImgs.length) return false;
+    for (let i = 0; i < origImgs.length; i++) {
+      const orig = origImgs[i];
+      const cur = curImgs[i];
+      if (cur.file !== null) return false;
+      if (orig.id !== cur.id) return false;
+      if (orig.url !== cur.url) return false;
+      if (orig.orden !== cur.orden) return false;
+    }
+    return true;
+  };
+
+  const comprobarCambios = () => {
+    if (!originalConfigRef.current) return false;
+    const orig = originalConfigRef.current;
+
+    if (telefonoContacto !== orig.telefonoContacto) return true;
+    if (correoContacto !== orig.correoContacto) return true;
+    if (direccion !== orig.direccion) return true;
+    if (horarioAtencion !== orig.horarioAtencion) return true;
+    if (enlaceFacebook !== orig.enlaceFacebook) return true;
+    if (enlaceInstagram !== orig.enlaceInstagram) return true;
+    if (enlaceTiktok !== orig.enlaceTiktok) return true;
+    if (logoFile !== null) return true;
+
+    if (!sonImagenesIguales(orig.imagenes, imagenes)) return true;
+
+    return false;
+  };
+
+  const tieneCambios = comprobarCambios();
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -624,7 +668,7 @@ const ContenidoWeb = () => {
           )}
         </div>
 
-        <button type="submit" style={styles.btnGuardar} disabled={guardando}>
+        <button type="submit" style={styles.btnGuardar} disabled={guardando || !tieneCambios}>
           <SaveFill /> {guardando ? "Guardando..." : "Guardar Cambios"}
         </button>
       </form>
