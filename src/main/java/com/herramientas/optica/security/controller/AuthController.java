@@ -33,15 +33,66 @@ public class AuthController {
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final EmpleadoRepository empleadoRepository;
+    private final com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository tipoDocumentoRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
             CustomUserDetailsService userDetailsService,
             JwtService jwtService,
-            EmpleadoRepository empleadoRepository) {
+            EmpleadoRepository empleadoRepository,
+            com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+            com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository tipoDocumentoRepository) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
         this.empleadoRepository = empleadoRepository;
+        this.clienteRepository = clienteRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tipoDocumentoRepository = tipoDocumentoRepository;
+    }
+
+    @PostMapping("/cliente/register")
+    public ResponseEntity<String> registrarCliente(@Valid @RequestBody com.herramientas.optica.modules.clientes.dto.ClienteRegisterDTO dto) {
+        if (clienteRepository.existsByCorreo(dto.getCorreo())) {
+            return ResponseEntity.badRequest().body("El correo ya está registrado.");
+        }
+        if (clienteRepository.findByNumeroDocumento(dto.getNumeroDocumento()).isPresent()) {
+            return ResponseEntity.badRequest().body("El número de documento ya está registrado.");
+        }
+        var tipoDoc = tipoDocumentoRepository.findById(dto.getIdTipoDocumento())
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no válido"));
+        
+        var cliente = com.herramientas.optica.modules.clientes.model.Cliente.builder()
+                .nombre(dto.getNombre())
+                .apellidoPaterno(dto.getApellidoPaterno())
+                .apellidoMaterno(dto.getApellidoMaterno())
+                .numeroDocumento(dto.getNumeroDocumento())
+                .tipoDocumento(tipoDoc)
+                .direccion(dto.getDireccion())
+                .telefono(dto.getTelefono())
+                .correo(dto.getCorreo())
+                .contrasena(passwordEncoder.encode(dto.getContrasena()))
+                .estado(1)
+                .build();
+        
+        clienteRepository.save(cliente);
+        return ResponseEntity.ok("Cliente registrado exitosamente.");
+    }
+
+    @PostMapping("/cliente/login")
+    public ResponseEntity<AuthResponse> loginCliente(@Valid @RequestBody AuthRequest request) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        String token = jwtService.generateToken(userDetails);
+        var cliente = clienteRepository.findByCorreo(userDetails.getUsername()).orElseThrow();
+        return ResponseEntity.ok(AuthResponse.builder()
+                .token(token)
+                .username(userDetails.getUsername())
+                .rol("CLIENTE")
+                .empleadoId(cliente.getId())
+                .build());
     }
 
     @PostMapping("/login")
