@@ -27,6 +27,10 @@ import ReporteCajas from "./pages/reportes/ReporteCajas";
 import EnProceso from "./pages/EnProceso";
 import CatalogoWeb from "./pages/CatalogoWeb";
 import Etiquetas from "./pages/Etiquetas";
+import ContenidoWeb from "./pages/ContenidoWeb";
+import CotizacionesAdmin from "./pages/CotizacionesAdmin";
+import PublicLayout from "./layouts/PublicLayout";
+import CatalogoPublico from "./pages/public/CatalogoPublico";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -73,6 +77,12 @@ function App() {
           }
         />
 
+        <Route path="/web" element={<PublicLayout />}>
+          <Route index element={<Navigate to="/web/catalogo" replace />} />
+          <Route path="catalogo" element={<CatalogoPublico />} />
+        </Route>
+        <Route path="/catalogo" element={<Navigate to="/web/catalogo" replace />} />
+
         <Route
           path="/"
           element={
@@ -113,24 +123,10 @@ function App() {
           />
           <Route path="catalogo-web" element={<CatalogoWeb />} />
           <Route path="gestion-web/catalogo-web" element={<CatalogoWeb />} />
-          <Route
-            path="cotizaciones"
-            element={
-              <EnProceso
-                titulo="Cotización"
-                descripcion="Esta pantalla mostrará las solicitudes y cotizaciones web cuando el flujo esté implementado."
-              />
-            }
-          />
-          <Route
-            path="gestion-web/cotizaciones"
-            element={
-              <EnProceso
-                titulo="Cotización"
-                descripcion="Esta pantalla mostrará las solicitudes y cotizaciones web cuando el flujo esté implementado."
-              />
-            }
-          />
+          <Route path="cotizaciones" element={<CotizacionesAdmin />} />
+          <Route path="gestion-web/cotizaciones" element={<CotizacionesAdmin />} />
+          <Route path="contenido-web" element={<ContenidoWeb />} />
+          <Route path="gestion-web/contenido" element={<ContenidoWeb />} />
           <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
           <Route path="compras" element={<Compras />} />
         </Route>
