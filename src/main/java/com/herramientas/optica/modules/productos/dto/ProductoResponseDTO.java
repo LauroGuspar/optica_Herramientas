@@ -42,13 +42,13 @@ public class ProductoResponseDTO {
 
     private Integer factorConversion;
 
-    private java.util.List<String> rutasImagenes;
+    private java.util.List<ProductoImagenResponseDTO> imagenes;
 
     private Boolean visibleWeb;
     private Boolean destacado;
     private String slug;
     private String descripcionWeb;
-    private String etiquetas;
+    private java.util.List<EtiquetaResponseDTO> etiquetas;
     private Integer orden;
 
     private LocalDateTime createdAt;

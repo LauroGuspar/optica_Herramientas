@@ -20,7 +20,7 @@ public class ProductoPublicResponseDTO {
     private TipoProducto tipoProducto;
     private String categoriaNombre;
     private String marcaNombre;
-    private List<String> rutasImagenes;
+    private List<ProductoImagenResponseDTO> imagenes;
     private List<String> etiquetas;
     private Integer orden;
     private Boolean conStock;

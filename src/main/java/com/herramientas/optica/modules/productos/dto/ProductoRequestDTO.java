@@ -75,6 +75,7 @@ public class ProductoRequestDTO {
     private Boolean destacado;
     private String slug;
     private String descripcionWeb;
-    private String etiquetas;
+    private java.util.List<Long> idEtiquetas;
     private Integer orden;
+    private java.util.List<ProductoImagenRequestDTO> imagenesConfig;
 }
