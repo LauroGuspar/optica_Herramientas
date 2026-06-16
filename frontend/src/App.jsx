@@ -29,6 +29,8 @@ import ReporteVentas from "./pages/reportes/ReporteVentas";
 import ReporteCompras from "./pages/reportes/ReporteCompras";
 import ReporteCajas from "./pages/reportes/ReporteCajas";
 import EnProceso from "./pages/EnProceso";
+import Configuracion from "./pages/Configuracion";
+
 import CatalogoWeb from "./pages/CatalogoWeb";
 import Etiquetas from "./pages/Etiquetas";
 import ContenidoWeb from "./pages/ContenidoWeb";
@@ -89,12 +91,7 @@ const router = createBrowserRouter([
       { path: "reportes/cajas", element: <ReporteCajas /> },
       {
         path: "configuracion",
-        element: (
-          <EnProceso
-            titulo="Configuración"
-            descripcion="Aquí se gestionará el cambio de contraseña y otros ajustes de cuenta."
-          />
-        ),
+        element: <Configuracion />,
       },
       { path: "catalogo-web", element: <CatalogoWeb /> },
       { path: "gestion-web/catalogo-web", element: <CatalogoWeb /> },

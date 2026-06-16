@@ -9,6 +9,9 @@ import {
   Eye,
   Whatsapp,
   Lock,
+  CheckCircleFill,
+  XCircleFill,
+  EyeSlash,
 } from "react-bootstrap-icons";
 
 const formatoMoneda = (valor) =>
@@ -19,9 +22,36 @@ const formatoMoneda = (valor) =>
 
 const MiCuenta = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("perfil"); // "perfil" o "cotizaciones"
+  const [activeTab, setActiveTab] = useState("perfil"); // "perfil", "cotizaciones" o "seguridad"
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+
+  // Password Change Data
+  const [passwordActual, setPasswordActual] = useState("");
+  const [passwordNueva, setPasswordNueva] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
+  const [showActual, setShowActual] = useState(false);
+  const [showNueva, setShowNueva] = useState(false);
+  const [showConfirmar, setShowConfirmar] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  // validation rules
+  const hasMinLength = passwordNueva.length >= 8;
+  const hasUppercase = /[A-Z]/.test(passwordNueva);
+  const hasLowercase = /[a-z]/.test(passwordNueva);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=\[\]~;\/\\]/.test(
+    passwordNueva,
+  );
+  const passwordsMatch =
+    passwordNueva === confirmarPassword && passwordNueva !== "";
+
+  const passwordFormValido =
+    hasMinLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasSpecialChar &&
+    passwordsMatch &&
+    passwordActual.trim() !== "";
 
   // Profile Data
   const [perfil, setPerfil] = useState(null);
@@ -122,6 +152,32 @@ const MiCuenta = () => {
     }
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!passwordFormValido) return;
+    setUpdatingPassword(true);
+    try {
+      await api.put("/api/v1/cliente-portal/perfil/contrasena", {
+        passwordActual,
+        passwordNueva,
+      });
+      Toast.fire({
+        icon: "success",
+        title: "Contraseña actualizada correctamente",
+      });
+      setPasswordActual("");
+      setPasswordNueva("");
+      setConfirmarPassword("");
+    } catch (error) {
+      console.error("Error al cambiar contraseña:", error);
+      const msg =
+        error.response?.data?.message || "No se pudo actualizar la contraseña.";
+      Toast.fire({ icon: "error", title: msg });
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   const openWhatsAppCoti = (coti) => {
     const itemsStr = coti.detalles
       .map(
@@ -196,6 +252,13 @@ const MiCuenta = () => {
             >
               <FileText size={18} />
               <span>Mis Cotizaciones</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("seguridad")}
+              className={`my-account-nav-btn ${activeTab === "seguridad" ? "active" : ""}`}
+            >
+              <Lock size={18} />
+              <span>Seguridad</span>
             </button>
           </nav>
         </aside>
@@ -311,7 +374,7 @@ const MiCuenta = () => {
                 </button>
               </form>
             </div>
-          ) : (
+          ) : activeTab === "cotizaciones" ? (
             <div className="my-account-card">
               <h3 className="my-account-card-title">
                 Historial de Cotizaciones
@@ -390,7 +453,251 @@ const MiCuenta = () => {
                 </div>
               )}
             </div>
-          )}
+          ) : activeTab === "seguridad" ? (
+            <div className="my-account-card">
+              <h3 className="my-account-card-title">Cambiar Contraseña</h3>
+              <form onSubmit={handleChangePassword} className="my-account-form">
+                <div className="my-account-form-group">
+                  <label className="my-account-label">
+                    Contraseña Actual *
+                  </label>
+                  <div
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <input
+                      type={showActual ? "text" : "password"}
+                      value={passwordActual}
+                      onChange={(e) => setPasswordActual(e.target.value)}
+                      required
+                      className="form-control"
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowActual(!showActual)}
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        background: "none",
+                        border: "none",
+                        color: "var(--color-text-muted)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {showActual ? <EyeSlash size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="my-account-form-group">
+                  <label className="my-account-label">Nueva Contraseña *</label>
+                  <div
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <input
+                      type={showNueva ? "text" : "password"}
+                      value={passwordNueva}
+                      onChange={(e) => setPasswordNueva(e.target.value)}
+                      required
+                      className="form-control"
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNueva(!showNueva)}
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        background: "none",
+                        border: "none",
+                        color: "var(--color-text-muted)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {showNueva ? <EyeSlash size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="my-account-form-group">
+                  <label className="my-account-label">
+                    Confirmar Nueva Contraseña *
+                  </label>
+                  <div
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <input
+                      type={showConfirmar ? "text" : "password"}
+                      value={confirmarPassword}
+                      onChange={(e) => setConfirmarPassword(e.target.value)}
+                      required
+                      className="form-control"
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmar(!showConfirmar)}
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        background: "none",
+                        border: "none",
+                        color: "var(--color-text-muted)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {showConfirmar ? (
+                        <EyeSlash size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: "var(--color-background)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    marginTop: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "var(--color-text-main)",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    Requisitos de la contraseña:
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: hasMinLength ? "#10b981" : "#ef4444",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {hasMinLength ? (
+                      <CheckCircleFill size={14} />
+                    ) : (
+                      <XCircleFill size={14} />
+                    )}
+                    <span>Mínimo 8 caracteres</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: hasUppercase ? "#10b981" : "#ef4444",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {hasUppercase ? (
+                      <CheckCircleFill size={14} />
+                    ) : (
+                      <XCircleFill size={14} />
+                    )}
+                    <span>Al menos una letra mayúscula</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: hasLowercase ? "#10b981" : "#ef4444",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {hasLowercase ? (
+                      <CheckCircleFill size={14} />
+                    ) : (
+                      <XCircleFill size={14} />
+                    )}
+                    <span>Al menos una letra minúscula</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: hasSpecialChar ? "#10b981" : "#ef4444",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {hasSpecialChar ? (
+                      <CheckCircleFill size={14} />
+                    ) : (
+                      <XCircleFill size={14} />
+                    )}
+                    <span>Al menos un carácter especial (ej: !@#$%^&*)</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: passwordsMatch ? "#10b981" : "#ef4444",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {passwordsMatch ? (
+                      <CheckCircleFill size={14} />
+                    ) : (
+                      <XCircleFill size={14} />
+                    )}
+                    <span>Las contraseñas coinciden</span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{
+                    width: "fit-content",
+                    marginTop: "16px",
+                    opacity: !passwordFormValido || updatingPassword ? 0.6 : 1,
+                    cursor:
+                      !passwordFormValido || updatingPassword
+                        ? "not-allowed"
+                        : "pointer",
+                  }}
+                  disabled={!passwordFormValido || updatingPassword}
+                >
+                  {updatingPassword ? "Guardando..." : "Cambiar Contraseña"}
+                </button>
+              </form>
+            </div>
+          ) : null}
         </main>
       </div>
 
