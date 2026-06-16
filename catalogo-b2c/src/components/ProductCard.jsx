@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { BagFill } from "react-bootstrap-icons";
 
 const formatoMoneda = (valor) =>
@@ -80,8 +81,8 @@ const ProductCard = ({ prod, onSelect, onAddToCart }) => {
         </span>
       )}
 
-      <div
-        onClick={() => onSelect(prod)}
+      <Link
+        to={`/producto/${prod.slug}`}
         style={{
           width: "100%",
           height: "190px",
@@ -118,7 +119,7 @@ const ProductCard = ({ prod, onSelect, onAddToCart }) => {
             Sin Imagen
           </div>
         )}
-      </div>
+      </Link>
 
       <div
         style={{
@@ -140,24 +141,28 @@ const ProductCard = ({ prod, onSelect, onAddToCart }) => {
         >
           {prod.marcaNombre || "Nuestra Marca"}
         </span>
-        <h4
-          onClick={() => onSelect(prod)}
-          style={{
-            fontSize: "15px",
-            fontWeight: "700",
-            color: "var(--color-text-main)",
-            margin: "0 0 6px 0",
-            cursor: "pointer",
-            lineHeight: "1.3",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            height: "40px",
-          }}
+        <Link
+          to={`/producto/${prod.slug}`}
+          style={{ textDecoration: "none", color: "inherit", display: "block" }}
         >
-          {prod.nombre}
-        </h4>
+          <h4
+            style={{
+              fontSize: "15px",
+              fontWeight: "700",
+              color: "var(--color-text-main)",
+              margin: "0 0 6px 0",
+              cursor: "pointer",
+              lineHeight: "1.3",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              height: "40px",
+            }}
+          >
+            {prod.nombre}
+          </h4>
+        </Link>
         <span
           style={{
             fontSize: "11px",
