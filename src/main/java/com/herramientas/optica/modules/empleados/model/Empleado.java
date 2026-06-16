@@ -80,9 +80,6 @@ public class Empleado {
     @Column(name = "id_tipodocumento", nullable = false)
     private Long idTipoDocumento;
 
-    @Column(name = "id_empresa", nullable = false)
-    @Builder.Default
-    private Long idEmpresa = 1L;
 
     @Column(name = "emple_reset_codigo", length = 6)
     private String resetCodigo;

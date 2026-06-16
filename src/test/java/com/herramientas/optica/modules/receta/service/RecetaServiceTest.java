@@ -106,7 +106,6 @@ class RecetaServiceTest {
                 .numeroDocumento("88877766")
                 .perfil(perfil)
                 .idTipoDocumento(1L)
-                .idEmpresa(1L)
                 .build());
     }
 }

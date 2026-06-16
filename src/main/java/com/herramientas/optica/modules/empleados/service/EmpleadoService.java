@@ -157,7 +157,6 @@ public class EmpleadoService {
             .contrasena(encodedPassword)
             .perfil(perfil)
             .idTipoDocumento(1L)
-            .idEmpresa(1L)
             .estado(ESTADO_ACTIVO)
             .build();
 

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.seeding.enabled=true")
 @ActiveProfiles("test")
 @Transactional
 class OpcionDataLoaderTest {

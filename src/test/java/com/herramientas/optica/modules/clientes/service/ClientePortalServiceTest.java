@@ -548,7 +548,6 @@ class ClientePortalServiceTest {
                 .numeroDocumento("88887777")
                 .perfil(perfil)
                 .idTipoDocumento(1L)
-                .idEmpresa(1L)
                 .build()
         );
 
