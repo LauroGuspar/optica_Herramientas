@@ -10,7 +10,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=America/Lima
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -48,7 +48,7 @@ services:
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
 
   admin:
     build:
@@ -61,7 +61,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "4173:80"
+      - "127.0.0.1:4173:80"
 
   catalogo:
     build:
@@ -72,7 +72,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "4174:80"
+      - "127.0.0.1:4174:80"
 
 volumes:
   mysql_data:
