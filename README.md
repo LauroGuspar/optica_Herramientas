@@ -1,4 +1,4 @@
-# 🔭 Sistema de Gestión Óptica
+# Sistema de Gestión Óptica
 
 > Solución ERP interna + Catálogo Web B2C para la administración integral de una óptica.  
 > Backend en **Spring Boot 4** · Frontends en **React 19 + Vite**
