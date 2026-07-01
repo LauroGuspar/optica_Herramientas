@@ -60,7 +60,7 @@ const ModalEditarMarca = ({ marca, cerrarModal, recargarTabla }) => {
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Nike, Adidas..."
+              placeholder="Ej: Ray-Ban, Oakley ..."
               autoFocus
             />
           </div>

@@ -63,7 +63,7 @@ const ModalEditarCategoria = ({ categoria, cerrarModal, recargarTabla }) => {
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Lubricantes, Filtros..."
+              placeholder="Ej: Limpiador, Paño..."
               autoFocus
             />
           </div>
