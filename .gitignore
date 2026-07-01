@@ -40,7 +40,6 @@ GEMINI.md
 .agents/
 .superpowers/
 skills-lock.json
-docs/
 
 ## Graphify ##
 graphify-out/
