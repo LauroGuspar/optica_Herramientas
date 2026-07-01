@@ -27,4 +27,12 @@ public class EmpleadoRequestDTO {
     @NotNull(message = "El perfil es obligatorio")
     @Positive(message = "El perfil debe ser válido")
     private Long idPerfil;
+
+    public void setTelefono(String telefono) {
+        this.telefono = (telefono == null || telefono.trim().isEmpty()) ? null : telefono.trim();
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = (direccion == null || direccion.trim().isEmpty()) ? null : direccion.trim();
+    }
 }

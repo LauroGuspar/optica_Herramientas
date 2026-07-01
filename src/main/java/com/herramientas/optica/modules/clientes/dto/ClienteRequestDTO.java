@@ -26,4 +26,16 @@ public class ClienteRequestDTO {
 
     @Size(max = 255, message = "La dirección no debe superar 255 caracteres")
     private String direccion;
+
+    public void setCorreo(String correo) {
+        this.correo = (correo == null || correo.trim().isEmpty()) ? null : correo.trim();
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = (telefono == null || telefono.trim().isEmpty()) ? null : telefono.trim();
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = (direccion == null || direccion.trim().isEmpty()) ? null : direccion.trim();
+    }
 }
