@@ -1,4 +1,4 @@
-import { Search, Filter, XLg } from "react-bootstrap-icons";
+import { Search, Filter, XLg, StarFill } from "react-bootstrap-icons";
 
 const FilterSidebar = ({
   busqueda,
@@ -172,7 +172,7 @@ const FilterSidebar = ({
                 accentColor: "var(--color-primary)",
               }}
             />
-            Solo destacados ⭐
+            Solo destacados <StarFill size={14} style={{ color: "#ffc107", marginLeft: "4px" }} />
           </label>
         </div>
       </div>

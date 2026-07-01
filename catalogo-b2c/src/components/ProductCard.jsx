@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BagFill } from "react-bootstrap-icons";
+import { BagFill, Eyeglasses } from "react-bootstrap-icons";
 
 const formatoMoneda = (valor) =>
   Number(valor || 0).toLocaleString("es-PE", {
@@ -112,10 +112,13 @@ const ProductCard = ({ prod, onSelect, onAddToCart }) => {
               color: "var(--color-text-muted)",
               fontSize: "12px",
               textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            🕶️
-            <br />
+            <Eyeglasses size={32} style={{ marginBottom: "6px" }} />
             Sin Imagen
           </div>
         )}
